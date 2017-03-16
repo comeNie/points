@@ -1,8 +1,2 @@
-/.project
-/.apt_generated
-/.settings
-/target
-/.classpath
-/.factorypath
-/*log
-/*lck
+/.apt_generated/
+/target/
