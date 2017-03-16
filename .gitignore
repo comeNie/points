@@ -1,2 +1,10 @@
 /.apt_generated/
 /target/
+/.settings
+/target
+/.project
+/.apt_generated
+/*log
+/*lck
+/.classpath
+/.factorypath
