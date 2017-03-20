@@ -8,3 +8,8 @@
 /*lck
 /.classpath
 /.factorypath
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
