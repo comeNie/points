@@ -12,19 +12,19 @@ public enum TradeType {
 	/**
 	 * 签到
 	 */
-	signIn("01"),
+	SIGNIN("01"),
 	/**
 	 * 积分券
 	 */
-	ticket("02"),
+	TICKET("02"),
     /**
      * 充值
      */
-	recharge("03"),
+	RECHARGE("03"),
     /**
      * 消费
      */
-	consume("04"),
+	CONSUME("04"),
 	;
  
 	private String value;
