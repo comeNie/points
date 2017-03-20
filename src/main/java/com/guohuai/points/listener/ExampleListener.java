@@ -23,7 +23,7 @@ public class ExampleListener {
 	// @Autowired
 	// private 鉴权接口;
 
-	@Value("${integral_environment}")
+	@Value("${integral_environment:test}")
 	String environment;
 
 	@EventListener(condition = "#event.tradeType == '01'")
