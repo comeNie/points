@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class GoodsForm {
+@EqualsAndHashCode(callSuper = false)
+public class GoodsForm extends BaseForm {
 
 	private String oid;
 
