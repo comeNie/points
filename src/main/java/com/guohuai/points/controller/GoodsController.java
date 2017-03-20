@@ -25,12 +25,13 @@ public class GoodsController {
 	@Autowired
 	private GoodsService goodsService;
 
+	private static final String result = "result";
+
 	@RequestMapping(value = "/save", method = {RequestMethod.POST, RequestMethod.GET})
 	@ResponseBody
 	public ResponseEntity<Response> save(@Valid GoodsForm req) {
 		Response r = new Response();
 		//验证参数
-		final String result = "result";
 		if (StringUtil.isEmpty(req.getName())) {
 			r.with(result, "商品名不能为空");
 			return new ResponseEntity<Response>(r, HttpStatus.OK);
@@ -67,7 +68,6 @@ public class GoodsController {
 	public ResponseEntity<Response> update(@Valid GoodsForm req) {
 		Response r = new Response();
 		//验证参数
-		final String result = "result";
 		if (StringUtil.isEmpty(req.getOid())) {
 			r.with(result, "无需要修改的商品");
 		}
@@ -107,7 +107,6 @@ public class GoodsController {
 	public ResponseEntity<Response> edit(@Valid GoodsForm req) {
 		Response r = new Response();
 		//验证参数
-		final String result = "result";
 		if (StringUtil.isEmpty(req.getOid())) {
 			r.with(result, "无需要修改的商品");
 			return new ResponseEntity<Response>(r, HttpStatus.OK);
