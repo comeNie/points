@@ -13,26 +13,31 @@ import com.guohuai.points.account.entity.AccountInfoEntity;
 
 public interface AccountInfoDao extends JpaRepository<AccountInfoEntity, String>, JpaSpecificationExecutor<AccountInfoEntity> {
 	
-	@Query(value = "SELECT * FROM T_ACCOUNT_INFO WHERE userOid = ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM t_point_account WHERE userOid = ?1", nativeQuery = true)
 	public List<AccountInfoEntity> findByUserOid(String userOid);
 	
-	@Query(value = "SELECT * FROM T_ACCOUNT_INFO WHERE accountNo = ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM t_point_account WHERE accountNo = ?1", nativeQuery = true)
 	public AccountInfoEntity findByAccountNo(String accountNo);
 	
-	@Query(value = "SELECT * FROM T_ACCOUNT_INFO WHERE oid = ?1 for update", nativeQuery = true)
+	@Query(value = "SELECT * FROM t_point_account WHERE oid = ?1 for update", nativeQuery = true)
 	public AccountInfoEntity findByOidForUpdate(String oid);
-	
-	@Query(value = "SELECT * FROM T_ACCOUNT_INFO WHERE userOid = ?1 and userType = ?2", nativeQuery = true)
-	public List<AccountInfoEntity> findByUserOidAndUserType(String userOid,String userType);
 	
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE T_ACCOUNT_INFO SET balance = balance + ?1 , updateTime = NOW() WHERE accountNo = ?2", nativeQuery = true)
+	@Query(value = "UPDATE t_point_account SET balance = balance + ?1 , updateTime = NOW() WHERE accountNo = ?2", nativeQuery = true)
 	public int updateBalance(BigDecimal balance,String accountNo);
 	
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE T_ACCOUNT_INFO SET balance = balance + ?1 , updateTime = NOW() WHERE accountNo = ?2", nativeQuery = true)
+	@Query(value = "UPDATE t_point_account SET balance = balance + ?1 , updateTime = NOW() WHERE accountNo = ?2", nativeQuery = true)
 	public int addBalance(BigDecimal balance,String accountNo);
-	
+
+	@Query(value = "SELECT * FROM t_point_account WHERE userOid = ?1 and accountType = ?2", nativeQuery = true)
+	public List<AccountInfoEntity> findByUserOidAndAccountType(String userOid,
+			String accountType);
+
+	@Query(value = "SELECT * FROM t_point_account WHERE userOid = ?1 and relationTicketCode = ?2  accountType = ?3", nativeQuery = true)
+	public List<AccountInfoEntity> findByUserOidAndAccountTypeAndProductNo(
+			String userOid, String relationProduct, String accountType);
+
 }
