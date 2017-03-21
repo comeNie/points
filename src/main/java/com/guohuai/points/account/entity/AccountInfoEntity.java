@@ -54,7 +54,7 @@ public class AccountInfoEntity extends UUID implements Serializable {
 	 */
 	private BigDecimal balance;
 	/**
-	 * NORMAL为正常，FROZEN为冻结
+	 * N为正常，Y为冻结
 	 */
 	private String frozenStatus;
 	/**
