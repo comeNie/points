@@ -7,10 +7,10 @@ import java.sql.Timestamp;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.guohuai.basic.component.ext.hibernate.UUID;
-
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.guohuai.basic.component.ext.hibernate.UUID;
 
 
 @Entity
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @lombok.Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class TransEntity extends UUID implements Serializable{
+public class AccountTransEntity extends UUID implements Serializable{
 	/**
 	* @Fields serialVersionUID : TODO
 	*/
