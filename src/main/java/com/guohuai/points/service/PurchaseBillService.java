@@ -2,7 +2,7 @@ package com.guohuai.points.service;
 
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.PageResp;
-import com.guohuai.points.dao.PointsPurchaseBillDao;
+import com.guohuai.points.dao.PurchaseBillDao;
 import com.guohuai.points.entity.PurchaseBillEntity;
 import com.guohuai.points.form.PurchaseBillFrom;
 import com.guohuai.points.res.PurchaseBillRes;
@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 public class PurchaseBillService {
 	@Autowired
-	private PointsPurchaseBillDao pointsPurchaseBillDao;
+	private PurchaseBillDao purchaseBillDao;
 
 	/**
 	 * 分页查询
@@ -35,7 +35,7 @@ public class PurchaseBillService {
 	 */
 	public PageResp<PurchaseBillRes> page(PurchaseBillFrom req) {
 
-		Page<PurchaseBillEntity> pages = pointsPurchaseBillDao.findAll(buildSpecification(req), new PageRequest(req.getPage() - 1, req.getRows()));
+		Page<PurchaseBillEntity> pages = purchaseBillDao.findAll(buildSpecification(req), new PageRequest(req.getPage() - 1, req.getRows()));
 		PageResp<PurchaseBillRes> resPage = new PageResp<>();
 
 		for (PurchaseBillEntity page : pages) {
@@ -66,7 +66,7 @@ public class PurchaseBillService {
 
 	public PurchaseBillRes findById(String oid) {
 
-		PurchaseBillEntity entity = pointsPurchaseBillDao.findOne(oid);
+		PurchaseBillEntity entity = purchaseBillDao.findOne(oid);
 		PurchaseBillRes billRes = new PurchaseBillRes();
 		BeanUtils.copyProperties(entity, billRes);
 
