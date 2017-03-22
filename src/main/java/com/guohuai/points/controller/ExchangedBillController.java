@@ -1,5 +1,6 @@
 package com.guohuai.points.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
@@ -23,22 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExchangedBillController {
 
 	@Autowired
-	ExchangedBillService exchangedBillService;
+	private ExchangedBillService exchangedBillService;
 
-	@RequestMapping(value = "list")
+	@RequestMapping(value = "page")
 	@ResponseBody
 	public ResponseEntity<PageResp<ExchangedBillRes>> page(ExchangedBillForm req) {
-
-		PageResp<ExchangedBillRes> pageResp = new PageResp<>();
-
-		if (StringUtil.isEmpty(req.getUserOid())) {
-			pageResp.setErrorCode(-1);
-			pageResp.setErrorMessage("用户ID为空！");
-			return new ResponseEntity<PageResp<ExchangedBillRes>>(pageResp, HttpStatus.OK);
-		}
-		log.info("PurchaseBillController分页查询用户ID：", req.getUserOid());
-
-		pageResp = exchangedBillService.page(req);
+		log.info("积分兑换记录查询：{}", JSONObject.toJSON(req));
+		PageResp<ExchangedBillRes> pageResp = exchangedBillService.page(req);
 		return new ResponseEntity<PageResp<ExchangedBillRes>>(pageResp, HttpStatus.OK);
 	}
 
@@ -51,7 +43,7 @@ public class ExchangedBillController {
 			BaseResp baseResp = new BaseResp(-1, "id为空！");
 			return new ResponseEntity<BaseResp>(baseResp, HttpStatus.OK);
 		}
-		log.info("查询单条记录ID：", oid);
+		log.info("查询单条记录ID：{}", oid);
 		ExchangedBillRes billRes = exchangedBillService.findById(oid);
 
 		return new ResponseEntity<BaseResp>(billRes, HttpStatus.OK);

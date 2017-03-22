@@ -39,5 +39,8 @@ public class ExchangedBillForm extends BaseForm {
 	 * 状态：0成功、1：失败
 	 */
 	private Integer state;
-
+	// 用于搜索（开始时间）
+	private Date startTime;
+	// 用于搜索（结束时间）
+	private Date endTime;
 }
