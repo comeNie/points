@@ -258,6 +258,9 @@ public class AccountInfoService {
      */
 	public AccountInfoEntity getAccountByTypeAndUser(String accountType, String userOid) {
 		AccountInfoEntity account = accountInfoDao.findByTypeAndUser(accountType, userOid);
+		if(account != null){
+			account = accountInfoDao.findByOidForUpdate(account.getOid());
+		}
 		return account;
 	}
 
