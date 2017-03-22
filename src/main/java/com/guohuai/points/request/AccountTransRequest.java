@@ -6,11 +6,11 @@ import java.math.BigDecimal;
 import lombok.Data;
 
 /**
- * 账户交易请求参数
-* @ClassName: NewUserRequest 
+ * 交易流水请求参数
+* @ClassName: AccountTransRequest 
 * @Description: 
-* @author longyunbo
-* @date 2016年11月8日 上午10:10:41 
+* @author CHENDONGHUI
+* @date 2017年3月22日 上午11:34:41 
 *
  */
 @Data
@@ -24,39 +24,32 @@ public class AccountTransRequest implements Serializable{
 	 */
 	private String userOid; 
 	/**
-	 * 用户类型
-	 * 投资人账户:T1、发行人账户:T2、平台账户:T3  
-	 */
-	private String userType; 
-	/**
 	 * 单据类型
 	 * 申购:01、赎回:02、派息:03、赠送体验金:04、体验金到期:05
 	 */
 	private String orderType; 
-	
 	/**
-	 * 产品类别 活期  01、定期 06
-	 * 在申购 赎回 增加发行人份额记账 派系时需要传入 
+	 * 账户类型
 	 */
-	private String productType;
+	public String accountType;
 	/**
-	 * 关联产品编号
+	 * 关联产品、卡券编号
 	 */
 	private String relationProductNo; 
 	/**
-	 * 关联产品名称
+	 * 关联产品、卡券名称
 	 */
 	private String relationProductName; 
 	/**
-	 * 交易额
+	 * 交易积分额
 	 */
-	private BigDecimal balance;	
+	private BigDecimal orderPoint;
 	/**
-	 * 代金券
+	 * 交易后积分余额
 	 */
-	private BigDecimal voucher;
+	private BigDecimal balance;
 	/**
-	 * 交易用途
+	 * 备注
 	 */
 	private String remark; 
 	/**
@@ -75,20 +68,13 @@ public class AccountTransRequest implements Serializable{
 	 * 定单描述
 	 */
 	private String orderDesc;
-	
 	/**
-	 * 转出产品编号
+	 * 交易账户
 	 */
-	private String outputRelationProductNo;
-	
+	private String transAccountNo;
 	/**
-	 * 转出产品名称
+	 * 积分方向，增add 减reduce
 	 */
-	private String outputRelationProductName;
-	
-	/**
-	 * 业务系统订单创建时间
-	 */
-	private String orderCreatTime;
+	private String direction;
 	
 }
