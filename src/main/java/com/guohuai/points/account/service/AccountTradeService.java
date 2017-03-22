@@ -47,6 +47,11 @@ public class AccountTradeService {
 	@Autowired
 	private AccountTransService accountTransService;
 	
+	/**
+	 * 积分交易
+	 * @param accountTradeRequest
+	 * @return
+	 */
 	public AccountTradeResponse trade(AccountTradeRequest accountTradeRequest){
 		log.info("积分账户交易：AccountTradeRequest{}",JSONObject.toJSONString(accountTradeRequest));
 		AccountTradeResponse accountTradeResponse = new AccountTradeResponse();
