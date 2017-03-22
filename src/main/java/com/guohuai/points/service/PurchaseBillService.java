@@ -45,7 +45,7 @@ public class PurchaseBillService {
 			resPage.getRows().add(res);
 		}
 		resPage.setTotal(pages.getTotalElements());
-		log.info("返回数据条数：{} ,数据总条数：{}", resPage.getRows().size(), pages.getTotalElements());
+		log.info("积分购买记录查询：返回数据条数：{} ,数据总条数：{}", resPage.getRows().size(), pages.getTotalElements());
 		return resPage;
 	}
 

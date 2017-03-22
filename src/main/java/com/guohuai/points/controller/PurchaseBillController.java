@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PurchaseBillController {
 
 	@Autowired
-	PurchaseBillService purchaseBillService;
+	private PurchaseBillService purchaseBillService;
 
 	@RequestMapping(value = "page")
 	@ResponseBody
@@ -32,7 +32,7 @@ public class PurchaseBillController {
 
 		log.info("积分购买记录查询：{}", JSONObject.toJSON(req));
 
-		PageResp<PurchaseBillRes>  pageResp = purchaseBillService.page(req);
+		PageResp<PurchaseBillRes> pageResp = purchaseBillService.page(req);
 		return new ResponseEntity<PageResp<PurchaseBillRes>>(pageResp, HttpStatus.OK);
 	}
 
@@ -45,7 +45,7 @@ public class PurchaseBillController {
 			BaseResp baseResp = new BaseResp(-1, "id为空！");
 			return new ResponseEntity<BaseResp>(baseResp, HttpStatus.OK);
 		}
-		log.info("查询单条记录ID：", oid);
+		log.info("查询单条记录ID：{}", oid);
 		PurchaseBillRes billRes = purchaseBillService.findById(oid);
 
 		return new ResponseEntity<BaseResp>(billRes, HttpStatus.OK);

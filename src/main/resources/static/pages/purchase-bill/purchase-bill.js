@@ -15,7 +15,7 @@ define([
             var pageOptions = {
                 page: 1,
                 rows: 10,
-                userOid: '111',
+                userOid: '',
                 settingOid: "",
                 state: "",
                 startTime: '',
@@ -84,14 +84,14 @@ define([
                     }, {
                         width: 50,
                         // 状态：0:成功、1:失败
-                        field: 'type',
+                        field: 'state',
                         formatter: function (val, row, index) {
-                        	var state = parseInt(row.state);
+                            var state = parseInt(row.state);
                             switch (state) {
                                 case 0:
-                                    return '成功'
+                                    return '成功';
                                 case 1:
-                                    return '失败'
+                                    return '失败';
                                 default:
                                     return '-'
                             }
@@ -123,29 +123,30 @@ define([
                      }
                      }
                      }*/
-                    , {width: 50
-                    	/*
-                        width: 100,
-                        filed: 'update',
-                        title: '操作',
-                        formatter: function (value, row) {
-                            var res = '-';
-                            if (row.state == 0) {
-                                res = '<a href="javascript:void(0)" class="style-putOn"  data-toggle="modal">上架</a>';
-                            }
-                            if (row.state == 1) {
-                                res = '<a href="javascript:void(0)" class="style-pullOff"  data-toggle="modal">下架</a>';
-                            }
-                            return res;
-                        },
-                        events: {
-                            'click .style-putOn': function (e, val, row) {
+                    , {
+                        width: 50
+                        /*
+                         width: 100,
+                         filed: 'update',
+                         title: '操作',
+                         formatter: function (value, row) {
+                         var res = '-';
+                         if (row.state == 0) {
+                         res = '<a href="javascript:void(0)" class="style-putOn"  data-toggle="modal">上架</a>';
+                         }
+                         if (row.state == 1) {
+                         res = '<a href="javascript:void(0)" class="style-pullOff"  data-toggle="modal">下架</a>';
+                         }
+                         return res;
+                         },
+                         events: {
+                         'click .style-putOn': function (e, val, row) {
 
-                            },
-                            'click .style-pullOff': function (e, val, row) {
+                         },
+                         'click .style-pullOff': function (e, val, row) {
 
-                            }
-                        }*/
+                         }
+                         }*/
                     }
                 ]
             }
@@ -162,14 +163,14 @@ define([
 
                 pageOptions.rows = val.limit;
                 pageOptions.page = parseInt(val.offset / val.limit) + 1;
-                return val
+                return val;
             }
 
             //清空
             $('#clear').on('click', function (e) {
-                e.preventDefault()
-                var sform = document.searchForm
-                util.form.reset($(sform))
+                e.preventDefault();
+                var sform = document.searchForm;
+                util.form.reset($(sform));
                 $('#goods_Table').bootstrapTable('refresh', pageOptions);
             });
             // 搜索
