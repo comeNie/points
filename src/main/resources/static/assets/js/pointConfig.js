@@ -8,6 +8,9 @@ define(function(){
 				update: this.host + '/points/goods/update',
 				edit: this.host + '/points/goods/edit',
 				list: this.host + '/points/goods/pag'
+			},
+			purchaseBill:{
+				list: this.host + '/points/purchaseBill/page'
 			}
 		}
 	}

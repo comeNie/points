@@ -19,6 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -44,7 +45,7 @@ public class PurchaseBillService {
 			resPage.getRows().add(res);
 		}
 		resPage.setTotal(pages.getTotalElements());
-
+		log.info("返回数据条数：{} ,数据总条数：{}", resPage.getRows().size(), pages.getTotalElements());
 		return resPage;
 	}
 
@@ -54,11 +55,23 @@ public class PurchaseBillService {
 			public Predicate toPredicate(Root<PurchaseBillEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				List<Predicate> list = new ArrayList<Predicate>();
 				if (!StringUtil.isEmpty(req.getUserOid())) {
-					list.add(cb.like(root.get("userOid").as(String.class), req.getUserOid()));
+					list.add(cb.like(root.get("userOid").as(String.class), "%" + req.getUserOid() + "%"));
+				}
+				if (!StringUtil.isEmpty(req.getSettingOid())) {
+					list.add(cb.like(root.get("settingOid").as(String.class), "%" + req.getSettingOid() + "%"));
+				}
+				if (null != req.getStartTime()) {
+					list.add(cb.greaterThanOrEqualTo(root.get("purchaseTime").as(Date.class), req.getStartTime()));
+				}
+				if (null != req.getEndTime()) {
+					list.add(cb.lessThan(root.get("purchaseTime").as(Date.class), req.getEndTime()));
+				}
+				if (null != req.getState()) {
+					list.add(cb.equal(root.get("state").as(Integer.class), req.getState()));
 				}
 
 				query.where(cb.and(list.toArray(new Predicate[list.size()])));
-//				query.orderBy(cb.desc(root.get("createTime")));
+				query.orderBy(cb.desc(root.get("createTime").as(Date.class)));
 				return query.getRestriction();
 			}
 		};

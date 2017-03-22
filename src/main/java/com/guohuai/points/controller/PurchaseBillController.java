@@ -1,5 +1,6 @@
 package com.guohuai.points.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
@@ -25,20 +26,13 @@ public class PurchaseBillController {
 	@Autowired
 	PurchaseBillService purchaseBillService;
 
-	@RequestMapping(value = "list")
+	@RequestMapping(value = "page")
 	@ResponseBody
 	public ResponseEntity<PageResp<PurchaseBillRes>> page(PurchaseBillFrom req) {
 
-		PageResp<PurchaseBillRes> pageResp = new PageResp<>();
+		log.info("积分购买记录查询：{}", JSONObject.toJSON(req));
 
-		if (StringUtil.isEmpty(req.getUserOid())) {
-			pageResp.setErrorCode(-1);
-			pageResp.setErrorMessage("用户ID为空！");
-			return new ResponseEntity<PageResp<PurchaseBillRes>>(pageResp, HttpStatus.OK);
-		}
-		log.info("PurchaseBillController分页查询用户ID：", req.getUserOid());
-
-		pageResp = purchaseBillService.page(req);
+		PageResp<PurchaseBillRes>  pageResp = purchaseBillService.page(req);
 		return new ResponseEntity<PageResp<PurchaseBillRes>>(pageResp, HttpStatus.OK);
 	}
 

@@ -38,4 +38,9 @@ public class PurchaseBillFrom extends BaseForm {
 
 	private Date createTime;
 	private Date updateTime;
+
+	// 用于搜索（开始时间）
+	private Date startTime;
+	// 用于搜索（结束时间）
+	private Date endTime;
 }
