@@ -9,6 +9,12 @@ define(function () {
                 edit: this.host + '/points/goods/edit',
                 list: this.host + '/points/goods/page'
             },
+            pointSetting: {
+				save: this.host + '/points/setting/save',
+				update: this.host + '/points/setting/update',
+				edit: this.host + '/points/setting/edit',
+				list: this.host + '/points/setting/page'
+			},
             purchaseBill: {
                 list: this.host + '/points/purchaseBill/page'
             },
