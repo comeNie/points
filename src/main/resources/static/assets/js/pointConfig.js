@@ -7,7 +7,7 @@ define(function () {
                 save: this.host + '/points/goods/save',
                 update: this.host + '/points/goods/update',
                 edit: this.host + '/points/goods/edit',
-                list: this.host + '/points/goods/pag'
+                list: this.host + '/points/goods/page'
             },
             purchaseBill: {
                 list: this.host + '/points/purchaseBill/page'

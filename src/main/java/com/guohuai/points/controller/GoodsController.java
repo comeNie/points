@@ -67,6 +67,7 @@ public class GoodsController {
 		//验证参数
 		if(StringUtil.isEmpty(req.getOid())){
 			r.with(Constant.RESULT, "无需要修改的商品");
+			return new ResponseEntity<Response>(r, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getName())) {
 			r.with(Constant.RESULT, "商品名不能为空");
@@ -90,6 +91,7 @@ public class GoodsController {
 		}
 		if(StringUtil.isEmpty(req.getFileOid())) {
 			r.with(Constant.RESULT, "商品图片不能为空");
+			return new ResponseEntity<Response>(r, HttpStatus.OK);
 		}
 
 		goodsService.updateGoods(req);

@@ -1,0 +1,126 @@
+<section class="content">
+	<div class="row">
+		<div class="col-xs-12">
+			<!-- 主体Grid -->
+			<div id="settingGrid" class="box box-primary">
+				<!-- Grid头部 -->
+				<div class="box-header">
+					<h3 class="box-title">购买积分设置</h3>
+					<div class="box-tools">
+						<button id="setting_add" class="btn btn-default btn-sm">
+							<i class="fa fa-plus">新建</i>
+						</button>
+					</div>
+				</div>
+				<!-- Grid内容体 -->
+				<div class="box-body">
+					<!-- 搜索项表单 -->
+					<form id="searchForm" name="searchForm" method="post" class="search-body">
+						<div class="row">
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>名称</label>
+		                             <input type="text" class="form-control input-sm" id="name" name="name" placeholder="搜索名称">
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>积分</label>
+									<input type="text" class="form-control input-sm" id="orderNo" name="orderNo" placeholder="搜索积分">
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>状态</label>
+									<select name="state" class="form-control input-sm">
+										<option selected="selected" value="">全部</option>
+										<option value="0">未上架</option>
+										<option value="1">已上架</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</form>
+					<!-- 主体数据表格 -->
+					<table id="setting_Table" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                        	<th>序号</th>
+                        	<th>名称</th>
+                        	<th>积分</th>
+                            <th>金额</th>
+                            <th>状态</th>
+                            <th>上架时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                    </table>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- 新建积分商品弹窗 -->
+<div id="addSettingModal" class="modal fade addModify" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<!-- 模态窗头部 -->
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">
+          			<span aria-hidden="true">&times;</span>
+       			</button>
+				<h4 class="modal-title">购买积分设置</h4>
+			</div>
+			<!-- 模态窗内容体 -->
+			<div class="modal-body">
+				<form id="addSettingForm" name="addSettingForm" method="post">
+					<div class="form-group">
+						<label>名称</label>
+						<input name="name" id="add_name" type="text" class="form-control input-sm" placeholder="请输入商品名" required>
+						<span id="add_name_err" style="color:red;"></span>
+					</div>
+					<div class="form-group">
+						<label>积分</label>
+						<input name="points" id="add_points" type="text" class="form-control input-sm" placeholder="请输入积分数" required>
+						<span id="add_points_err" style="color:red;"></span>
+					</div>
+					<div class="form-group">
+						<label>金额</label>
+						<input name="amount" id="add_amount" type="text" class="form-control input-sm" placeholder="请输入所需金额" required>
+						<span id="add_amount_err" style="color:red;"></span>
+					</div>
+					<div class="form-group">
+						<label>总张数</label>
+						<input name="totalCount" id="add_totalCount" type="text" class="form-control input-sm" placeholder="请输入总张数" required>
+						<span id="add_totalCount_err" style="color:red;"></span>
+					</div>
+					<input name="oid" type="hidden">
+				</form>
+			</div>
+			<!-- 模态窗底部 -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+				<button id="doAddSetting" type="button" class="btn btn-primary btn-submit">提 交</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!--确认提示框-->
+<div id="confirmModal" class="popover func-delete-popover">
+	<div class="arrow"></div>
+	<h3 class="popover-title">提示</h3>
+	<div class="popover-content">
+		<p>确定？</p>
+		<div class="popover-btn clearfix">
+			<div class="unit">
+				<button class="btn btn-block btn-primary accept" data-dismiss="modal">确 定</button>
+			</div>
+			<div class="unit">
+				<button class="btn btn-block btn-default cancel" data-dismiss="modal">取 消</button>
+			</div>
+		</div>
+	</div>
+</div>
