@@ -48,8 +48,8 @@ public class AccOrderService {
             //判断订单是否已存在
             if (orderEntity != null) {
                 if (AccOrderEntity.ORDERSTATUS_SUCC.equals(orderEntity.getOrderStatus())) {//存在且为成功的订单
-                    resp.setReturnCode(TradeEventCodeEnum.TRADE_1004.getCode());
-                    resp.setErrorMessage(TradeEventCodeEnum.TRADE_1004.getName());//订单号已经存在
+                    resp.setReturnCode(TradeEventCodeEnum.TRADE_2004.getCode());
+                    resp.setErrorMessage(TradeEventCodeEnum.TRADE_2004.getName());//订单号已经存在
                     log.debug("订单号已存在orderNo:[" + orderEntity.getOrderNo() + "]");
                     return resp;
                 }
