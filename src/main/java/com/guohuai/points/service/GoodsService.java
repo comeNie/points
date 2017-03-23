@@ -1,5 +1,6 @@
 package com.guohuai.points.service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,11 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.guohuai.basic.common.StringUtil;
+import com.guohuai.basic.component.ext.web.BaseResp;
+import com.guohuai.basic.component.ext.web.PageResp;
 import com.guohuai.points.dao.GoodsDao;
 import com.guohuai.points.entity.PointGoodsEntity;
+import com.guohuai.points.entity.PointSettingEntity;
 import com.guohuai.points.form.GoodsForm;
 import com.guohuai.points.res.GoodsRes;
 
@@ -37,22 +41,28 @@ public class GoodsService {
 	 * 新增积分商品
 	 * @param req
 	 */
-	public void saveGoods(GoodsForm req){
+	public BaseResp saveGoods(GoodsForm req){
 		logger.info("新增积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = new PointGoodsEntity();
 		BeanUtils.copyProperties(req, entity);
+		//默认已兑换数为0
+		entity.setExchangedCount(new BigDecimal(0));
 		entity.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		entity.setOid(StringUtil.uuid());
 		entity.setState(0);
 		goodsDao.save(entity);
+		response.setErrorCode(0);
+		return response;
 	}
 	
 	/**
 	 * 编辑积分商品
 	 * @param req
 	 */
-	public void updateGoods(GoodsForm req){
+	public BaseResp updateGoods(GoodsForm req){
 		logger.info("编辑积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = goodsDao.findOne(req.getOid());
 		if(null != entity){
 			entity.setName(req.getName());
@@ -64,21 +74,31 @@ public class GoodsService {
 			entity.setFileOid(req.getFileOid());
 			entity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 			goodsDao.save(entity);
+			response.setErrorCode(0);
+		}else{
+			response.setErrorCode(-1);
 		}
+		return response;
 	}
 	
 	/**
 	 * 上架、下架、删除积分商品
 	 * @param req
 	 */
-	public void editGoods(GoodsForm req){
+	public BaseResp editGoods(GoodsForm req){
 		logger.info("上架、下架积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = goodsDao.findOne(req.getOid());
 		if(null != entity){
 			entity.setState(req.getState());
 			entity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 			goodsDao.save(entity);
+			response.setErrorCode(0);
+		}else{
+			response.setErrorCode(-1);
 		}
+		
+		return response;
 	}
 	
 	/**
@@ -86,18 +106,14 @@ public class GoodsService {
 	 * @param req
 	 * @return
 	 */
-	public GoodsRes page(GoodsForm req){
+	public PageResp<PointGoodsEntity> page(GoodsForm req){
 		Page<PointGoodsEntity> listPage = goodsDao.findAll(this.buildSpecification(req), new PageRequest(req.getPage() -1 , req.getRows()));
-		GoodsRes res = null;
+		PageResp<PointGoodsEntity> pagesRep = new PageResp<PointGoodsEntity>();
 		if(null != listPage && listPage.getSize() > 0){
-			res = new GoodsRes();
-			res.setRows(listPage.getContent());
-			res.setTotalPage(listPage.getTotalPages());
-			res.setPage(req.getPage());
-			res.setRow(req.getRows());
-			res.setTotal(listPage.getTotalElements());
+			pagesRep.setRows(listPage.getContent());
+			pagesRep.setTotal(listPage.getTotalElements());
 		}
-		return res;
+		return pagesRep;
 	}
 	
 	/**
