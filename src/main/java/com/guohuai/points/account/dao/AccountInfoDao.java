@@ -40,4 +40,10 @@ public interface AccountInfoDao extends JpaRepository<AccountInfoEntity, String>
 	public List<AccountInfoEntity> findByUserOidAndAccountTypeAndProductNo(
 			String userOid, String relationProduct, String accountType);
 
+	@Query(value = "SELECT * FROM t_point_account WHERE accountType = ?1 and userOid = ?2 Limit 1", nativeQuery = true)
+	public AccountInfoEntity findByTypeAndUser(String accountType, String userOid);
+
+	@Query(value = "SELECT * FROM t_point_account WHERE accountType IN('02','03','04') AND balance > 0 AND frozenStatus='N' AND userOid = ?1 ORDER BY overdueTime DESC", nativeQuery = true)
+	public List<AccountInfoEntity> findChildAccountListByUser(String userOid);
+
 }

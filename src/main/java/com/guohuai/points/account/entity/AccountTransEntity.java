@@ -23,10 +23,10 @@ public class AccountTransEntity extends UUID implements Serializable{
 	* @Fields serialVersionUID : TODO
 	*/
 	
-	//转账标记
-	public static final String TRANSFER = "TRANSFER";
-	//入账标记
-	public static final String ENTERACCOUNT = "ENTERACCOUNT";
+	//积分增加标记
+	public static final String ADD = "ADD";
+	//积分减少标记
+	public static final String REDUCE = "REDUCE";
 	
 	
 	private static final long serialVersionUID = 4140226088022063676L;
@@ -72,7 +72,7 @@ public class AccountTransEntity extends UUID implements Serializable{
 	 */
 	private String orderDesc;
 	/**
-	 * 积分方向，增+ 减-
+	 * 积分方向，增add 减reduce
 	 */
 	private String direction;
 	/**
@@ -86,7 +86,7 @@ public class AccountTransEntity extends UUID implements Serializable{
 	/**
 	 * 备注
 	 */
-	private String ramark;
+	private String remark;
 	/**
 	 * 交易账户
 	 */

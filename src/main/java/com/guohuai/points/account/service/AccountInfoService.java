@@ -3,6 +3,7 @@ package com.guohuai.points.account.service;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +65,8 @@ public class AccountInfoService {
 		String accountNo = this.seqGenerator.next(CodeConstants.ACCOUNT_NO_PREFIX);
 		account.setAccountNo(accountNo);
 		account.setUserOid(req.getUserOid());
-		account.setAccountType(AccountTypeEnum.ACCOUNT_TYPE01.getCode());//积分基本户
-		account.setAccountName(AccountTypeEnum.ACCOUNT_TYPE01.getName());
+		account.setAccountType(req.getAccountType());//积分基本户
+		account.setAccountName(AccountTypeEnum.getEnumName(req.getAccountType()));
 		account.setBalance(BigDecimal.ZERO);
 		account.setFrozenStatus("N");//默认N
 		account.setRemark(req.getRemark());
@@ -82,7 +83,7 @@ public class AccountInfoService {
 	 * @return
 	 */
 	@Transactional
-	public CreateAccountResponse saveAccount(CreateAccountRequest req){
+	public CreateAccountResponse addChildAccount(CreateAccountRequest req){
 		logger.info("新增账户:[" + JSONObject.toJSONString(req) + "]");
 		CreateAccountResponse resp = new CreateAccountResponse();
 		//基本校验
@@ -91,14 +92,14 @@ public class AccountInfoService {
 			return resp;
 		}
 		List<AccountInfoEntity> accInfoList = null;
-		logger.info("查询用户是否存在");
+		logger.info("查询用户子积分账户是否存在");
     	if(StringUtil.isEmpty(req.getRelationProduct())) {//无关联产品或卡券的积分账户
     		accInfoList = accountInfoDao.findByUserOidAndAccountType(req.getUserOid(), req.getAccountType());
     	} else {//有关联产品或卡券的积分账户
     		accInfoList = accountInfoDao.findByUserOidAndAccountTypeAndProductNo(req.getUserOid(), req.getRelationProduct(), req.getAccountType());
     	}
 		if(accInfoList!=null && accInfoList.size()>0) {
-			logger.info("账户已存在，不需要新建 ,userOid:{},aies:{}",req.getUserOid(),accInfoList.size());
+			logger.info("子积分账户已存在，不需要新建 ,userOid:{},aies:{}",req.getUserOid(),accInfoList.size());
 			resp.setReturnCode(Constant.SUCCESS);
 			resp.setErrorMessage("成功");
 			resp.setAccountNo(accInfoList.get(0).getAccountNo());
@@ -128,7 +129,7 @@ public class AccountInfoService {
 		account.setOverdueTime(req.getOverdueTime());
 		account.setCreateTime(nowTime);
 		account.setUpdateTime(nowTime);
-		logger.info("保存用户信息{}",JSONObject.toJSONString(account));
+		logger.info("保存用户子账户信息{}",JSONObject.toJSONString(account));
 		Object result = accountInfoDao.save(account);
 		//返回参数
 		if(result != null){
@@ -143,9 +144,9 @@ public class AccountInfoService {
 			resp.setCreateTime(DateUtil.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss"));
 		}else{
 			resp.setReturnCode(Constant.FAIL);
-			resp.setErrorMessage("创建用户失败");
+			resp.setErrorMessage("创建用户子积分账户失败");
 		}
-		logger.info("保存用户信息完成  createUserResp:{}",JSONObject.toJSON(resp));
+		logger.info("保存用户子账户信息完成  createUserResp:{}",JSONObject.toJSON(resp));
 		return resp;
 	}
 	
@@ -214,5 +215,63 @@ public class AccountInfoService {
         }
 		return response;
     }
+
+    /**
+     * 批量更新积分账户余额
+     * @param list
+     * @return
+     */
+    @Transactional
+	public BaseResp update(List<Map<String, Object>> list) {
+		BaseResp response = new BaseResp();
+		for(Map<String, Object> map :list){
+			logger.info("{}积分账户余额变动,balance:{}", map.get("oid"), map.get("balance"));
+			//验证参数
+	 		if(StringUtil.isEmpty((String) map.get("oid"))) {
+	 			response.setErrorCode(-1);
+	 			response.setErrorMessage("OID不能为空");
+	 			return response;
+	 		}
+	        AccountInfoEntity accEntity = this.accountInfoDao.findOne((String) map.get("oid"));
+	        
+	        if(accEntity!=null) {
+	        	accEntity.setBalance((BigDecimal) map.get("balance"));
+	        	accEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+	        	accEntity = this.accountInfoDao.saveAndFlush(accEntity);
+	            
+	            logger.info("更新AccountInfoEntity,AccountInfoEntity:{}", JSON.toJSONString(accEntity));
+	            response.setErrorCode(0);
+	        } else {
+	        	response.setErrorCode(-1);
+	        	response.setErrorMessage("找不到账户");
+	        	return response;
+	        }
+		}
+		return response;
+	}
+
+    /**
+     * 根据账户类型及用户id查询用户积分账户信息
+     * @param accountType
+     * @param userOid
+     * @return
+     */
+	public AccountInfoEntity getAccountByTypeAndUser(String accountType, String userOid) {
+		AccountInfoEntity account = accountInfoDao.findByTypeAndUser(accountType, userOid);
+		if(account != null){
+			account = accountInfoDao.findByOidForUpdate(account.getOid());
+		}
+		return account;
+	}
+
+	/**
+	 * 根基用户查询用户名下所有有积分的子账户
+	 * @param userOid
+	 * @return
+	 */
+	public List<AccountInfoEntity> getChildAccountListByUser(String userOid) {
+		List<AccountInfoEntity> childAccountListByUser = accountInfoDao.findChildAccountListByUser(userOid);
+		return childAccountListByUser;
+	}
 
 }

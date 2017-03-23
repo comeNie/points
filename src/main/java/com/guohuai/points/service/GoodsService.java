@@ -110,12 +110,18 @@ public class GoodsService {
 			@Override
 			public Predicate toPredicate(Root<PointGoodsEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 				List<Predicate> bigList = new ArrayList<Predicate>();
-				if (!StringUtil.isEmpty(req.getName()))
-					bigList.add(cb.like(root.get("name").as(String.class), req.getName()));
-				if (!StringUtil.isEmpty(req.getType()))
-					bigList.add(cb.equal(root.get("type").as(String.class), req.getType()));
-				if (null != req.getState())
+				if (!StringUtil.isEmpty(req.getName())){
+					bigList.add(cb.like(root.get("name").as(String.class), "%" + req.getName() + "%"));					
+				}
+				if (!StringUtil.isEmpty(req.getType())){
+					bigList.add(cb.equal(root.get("type").as(String.class), req.getType()));					
+				}
+				if (null != req.getState()){
 					bigList.add(cb.equal(root.get("state"), req.getState()));
+				} else {
+					//默认查询非删除的商品
+					bigList.add(cb.gt(root.get("state"), -1));
+				}
 				
 				query.where(cb.and(bigList.toArray(new Predicate[bigList.size()])));
 				query.orderBy(cb.desc(root.get("createTime")));

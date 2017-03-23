@@ -13,59 +13,49 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "t_point_goods")
+@Table(name = "t_point_setting")
 @lombok.Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class PointGoodsEntity extends UUID implements Serializable {
+public class PointSettingEntity extends UUID implements Serializable {
 
-	//商品状态(0:未上架、1:已上架、2:已下架)
-	public static final String GOODSSTATE_INIT = "0";
-	public static final String GOODSSTATE_PUTON = "1";
-	public static final String GOODSSTATE_PULLOFF = "2";
-	public static final String GOODSSTATE_DELE = "-1";
-	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4561872254473098052L;
+	private static final long serialVersionUID = 6653357380412407567L;
+	
+	//商品状态(-1:删除、0:未上架、1:已上架、2:已下架)
+	public static final String SETTING_STATE_INIT = "0";
+	public static final String SETTING_STATE_PUTON = "1";
+	public static final String SETTING_STATE_PULLOFF = "2";
+	public static final String SETTING_STATE_DELE = "-1";
 	
 	/**
-	 * 兑换商品名
+	 * 积分产品名称
 	 */
 	private String name;
 	
 	/**
-	 * 枚举: real实物、virtual虚拟
+	 * 积分
 	 */
-	private String type;
+	private BigDecimal points;
 	
 	/**
-	 * 所需积分
+	 * 所需金额
 	 */
-	private BigDecimal needPoints;
+	private BigDecimal amount;
 	/**
 	 * 商品总数量
 	 */
 	private BigDecimal totalCount;
 	/**
-	 * 已兑换数量
+	 * 剩余数量
 	 */
-	private BigDecimal exchangedCount;
+	private BigDecimal remainCount;
 	/**
 	 * 商品状态(0:未上架、1:已上架、2:已下架)
 	 */
 	private Integer state;
-	
-	/**
-	 * 商品图片id
-	 */
-	private String fileOid;
-	
-	/**
-	 * 商品介绍
-	 */
-	private String remark;
 	
 	/**
 	 * 修改人
