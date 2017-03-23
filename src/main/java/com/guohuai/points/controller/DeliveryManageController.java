@@ -1,0 +1,90 @@
+package com.guohuai.points.controller;
+
+import com.alibaba.fastjson.JSONObject;
+import com.guohuai.basic.common.StringUtil;
+import com.guohuai.basic.component.ext.web.BaseResp;
+import com.guohuai.basic.component.ext.web.PageResp;
+import com.guohuai.points.form.DeliveryForm;
+import com.guohuai.points.form.ExchangedBillForm;
+import com.guohuai.points.res.DeliveryRes;
+import com.guohuai.points.service.DeliveryManageService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 发货管理
+ */
+@RestController
+@RequestMapping(value = "/points/deliveryManage/")
+@Slf4j
+public class DeliveryManageController {
+
+	@Autowired
+	private DeliveryManageService deliveryManageService;
+
+	@RequestMapping(value = "page")
+	@ResponseBody
+	public ResponseEntity<PageResp<DeliveryRes>> page(ExchangedBillForm req) {
+		log.info("发货管理查询：{}", JSONObject.toJSON(req));
+		PageResp<DeliveryRes> pageResp = deliveryManageService.page(req);
+		return new ResponseEntity<PageResp<DeliveryRes>>(pageResp, HttpStatus.OK);
+	}
+
+
+	@RequestMapping(value = "findById")
+	@ResponseBody
+	public ResponseEntity<BaseResp> findById(String oid) {
+
+		if (StringUtil.isEmpty(oid)) {
+			BaseResp baseResp = new BaseResp(-1, "id为空！");
+			return new ResponseEntity<BaseResp>(baseResp, HttpStatus.OK);
+		}
+		log.info("查询单条记录ID：{}", oid);
+		DeliveryRes billRes = deliveryManageService.findById(oid);
+
+		return new ResponseEntity<BaseResp>(billRes, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public ResponseEntity<BaseResp> save(DeliveryForm req) {
+		log.info("新增或修改发货记录：{}", req);
+		BaseResp res = checkSaveForm(req);
+		log.info("新增或修改发货记录校验结果：{}", res);
+		if (res.getErrorCode() == -1) {
+			return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
+		}
+		res = deliveryManageService.save(req);
+		return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
+	}
+
+	private BaseResp checkSaveForm(DeliveryForm req) {
+
+		BaseResp baseResp = new BaseResp(-1, "失败");
+		if (StringUtil.isEmpty(req.getOid())) {
+			baseResp.setErrorMessage("oid为空！");
+			return baseResp;
+		}
+		if (StringUtil.isEmpty(req.getSendOperater())) {
+			baseResp.setErrorMessage("发货人为空！");
+			return baseResp;
+		}
+		if (StringUtil.isEmpty(req.getLogisticsCompany())) {
+			baseResp.setErrorMessage("物流公司为空！");
+			return baseResp;
+		}
+		if (StringUtil.isEmpty(req.getLogisticsNumber())) {
+			baseResp.setErrorMessage("物流号为空！");
+			return baseResp;
+		}
+		baseResp.setErrorMessage("成功");
+		baseResp.setErrorCode(0);
+		return baseResp;
+	}
+}
+
