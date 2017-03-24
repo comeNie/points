@@ -118,9 +118,13 @@ define([
 						if(row.state == 1){
 							res = '<a href="javascript:void(0)" class="style-pullOff"  data-toggle="modal">下架</a>';
 						}
+						if(row.state == 2){
+							res = '<a href="javascript:void(0)" class="style-delete"  data-toggle="modal">删除</a>';
+						}
 						return res;
 					},
 					events: {
+						'click .style-delete': deleteSettingClick,
 						'click .style-update': updateGoodsClick,
 						'click .style-putOn': putOnGoodsClick,
 						'click .style-pullOff': pullOffGoodsClick
@@ -135,6 +139,33 @@ define([
             $$.searchInit($('#searchForm'), $('#goods_Table'));
 
             //按钮事件
+            function deleteSettingClick(e, val, row){
+				console.log('oid===>'+row.oid);
+				var oid = row.oid;
+				var confirm = $('#confirmModal');
+				confirm.find('.popover-title').html('提示');
+				confirm.find('p').html('确定要删除该积分商品吗？');
+				$('#tip_cancel').show();
+				$$.confirm({
+					container: confirm,
+					trigger: this,
+					accept: function(){
+						http.get(pointConfig.api.pointGoods.edit, {
+							data: {
+								oid: oid,
+								state: -1
+							}, 
+						}, function(res){
+								if(res.errorCode == 0){
+									confirm.modal('hide');
+									$('#goods_Table').bootstrapTable('refresh', pageOptions);
+								}else{
+									errorHandle(res);//??
+								}
+						})
+					}
+				});
+			}
             function updateGoodsClick(e, val, row){
 				//进入修改页面
 				console.log('oid===>'+row.oid);
@@ -235,7 +266,7 @@ define([
 				var name = $("#add_name").val().trim();
 				var needPoints = $("#add_needPoints").val().trim();
 				var totalCount = $("#add_totalCount").val().trim();
-				var remark = $("#add_remark").val().trim();
+				var remark = $("#add_remark").val();
 				//var fileOid = $("#file_oid").val().trim(); //图片
 				if (name == "") {
                     $("#add_name_err").text("商品名不能为空");
@@ -272,7 +303,7 @@ define([
 				var name = $("#update_name").val().trim();
 				var needPoints = $("#update_needPoints").val().trim();
 				var totalCount = $("#update_totalCount").val().trim();
-				var remark = $("#update_remark").val().trim();
+				var remark = $("#update_remark").val();
 				//var fileOid = $("#file_oid").val().trim(); //图片
 				
 				if (name == "") {
