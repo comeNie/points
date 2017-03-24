@@ -5,7 +5,6 @@ import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
 import com.guohuai.points.form.DeliveryForm;
-import com.guohuai.points.form.ExchangedBillForm;
 import com.guohuai.points.res.DeliveryRes;
 import com.guohuai.points.service.DeliveryManageService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +28,11 @@ public class DeliveryManageController {
 
 	@RequestMapping(value = "page")
 	@ResponseBody
-	public ResponseEntity<PageResp<DeliveryRes>> page(ExchangedBillForm req) {
+	public ResponseEntity<PageResp<DeliveryRes>> page(DeliveryForm req) {
 		log.info("发货管理查询：{}", JSONObject.toJSON(req));
 		PageResp<DeliveryRes> pageResp = deliveryManageService.page(req);
 		return new ResponseEntity<PageResp<DeliveryRes>>(pageResp, HttpStatus.OK);
 	}
-
 
 	@RequestMapping(value = "findById")
 	@ResponseBody
@@ -63,6 +61,25 @@ public class DeliveryManageController {
 		return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "cancel")
+	@ResponseBody
+	public ResponseEntity<BaseResp> cancel(DeliveryForm req) {
+		log.info("取消发货记录：{}", req);
+		BaseResp res = checkCancelForm(req);
+		log.info("取消发货记录校验结果：{}", res);
+		if (res.getErrorCode() == -1) {
+			return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
+		}
+		res = deliveryManageService.cancel(req);
+		return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
+	}
+
+	/**
+	 * 检查新增或修改发货记录的请求参数
+	 *
+	 * @param req request
+	 * @return BaseResp
+	 */
 	private BaseResp checkSaveForm(DeliveryForm req) {
 
 		BaseResp baseResp = new BaseResp(-1, "失败");
@@ -71,7 +88,7 @@ public class DeliveryManageController {
 			return baseResp;
 		}
 		if (StringUtil.isEmpty(req.getSendOperater())) {
-			baseResp.setErrorMessage("发货人为空！");
+			baseResp.setErrorMessage("操作人为空！会话超时，请重新登录！");
 			return baseResp;
 		}
 		if (StringUtil.isEmpty(req.getLogisticsCompany())) {
@@ -80,6 +97,32 @@ public class DeliveryManageController {
 		}
 		if (StringUtil.isEmpty(req.getLogisticsNumber())) {
 			baseResp.setErrorMessage("物流号为空！");
+			return baseResp;
+		}
+		baseResp.setErrorMessage("成功");
+		baseResp.setErrorCode(0);
+		return baseResp;
+	}
+
+	/**
+	 * 检查取消发货的请求参数
+	 *
+	 * @param req request
+	 * @return BaseResp
+	 */
+	private BaseResp checkCancelForm(DeliveryForm req) {
+
+		BaseResp baseResp = new BaseResp(-1, "失败");
+		if (StringUtil.isEmpty(req.getOid())) {
+			baseResp.setErrorMessage("oid为空！");
+			return baseResp;
+		}
+		if (StringUtil.isEmpty(req.getCancelOperater())) {
+			baseResp.setErrorMessage("操作人为空！会话超时，请重新登录！");
+			return baseResp;
+		}
+		if (StringUtil.isEmpty(req.getCancelReason())) {
+			baseResp.setErrorMessage("取消原因为空！");
 			return baseResp;
 		}
 		baseResp.setErrorMessage("成功");

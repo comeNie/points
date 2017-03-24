@@ -1,5 +1,7 @@
 package com.guohuai.points.service;
 
+import com.guohuai.basic.common.StringUtil;
+import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
 import com.guohuai.points.dao.DeliveryManageDao;
 import com.guohuai.points.entity.DeliveryEntity;
@@ -35,7 +37,7 @@ public class DeliveryManageService {
 	 * @param req
 	 * @return
 	 */
-	public PageResp<DeliveryRes> page(ExchangedBillForm req) {
+	public PageResp<DeliveryRes> page(DeliveryForm req) {
 
 		Page<DeliveryEntity> pages = deliveryManageDao.findAll(buildSpecification(req), new PageRequest(req.getPage() - 1, req.getRows()));
 		PageResp<DeliveryRes> resPage = new PageResp<>();
@@ -50,7 +52,7 @@ public class DeliveryManageService {
 		return resPage;
 	}
 
-	private Specification<DeliveryEntity> buildSpecification(ExchangedBillForm req) {
+	private Specification<DeliveryEntity> buildSpecification(DeliveryForm req) {
 		return new Specification<DeliveryEntity>() {
 			@Override
 			public Predicate toPredicate(Root<DeliveryEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -64,7 +66,9 @@ public class DeliveryManageService {
 				if (null != req.getState()) {
 					list.add(cb.equal(root.get("state").as(Integer.class), req.getState()));
 				}
-
+				if (!StringUtil.isEmpty(req.getOrderNumber())) {
+					list.add(cb.like(root.get("orderNumber").as(String.class), "%" + req.getOrderNumber() + "%"));
+				}
 				query.where(cb.and(list.toArray(new Predicate[list.size()])));
 				query.orderBy(cb.asc(root.get("state").as(Integer.class)), cb.desc(root.get("orderedTime").as(Date.class)));
 
@@ -84,15 +88,32 @@ public class DeliveryManageService {
 
 	@Transactional
 	public DeliveryRes save(DeliveryForm req) {
-		DeliveryEntity entity = deliveryManageDao.updateByOid(req.getOid());
 
+		DeliveryEntity entity = deliveryManageDao.updateByOid(req.getOid());
 		entity.setLogisticsCompany(req.getLogisticsCompany());
 		entity.setLogisticsNumber(req.getLogisticsNumber());
 		entity.setSendOperater(req.getSendOperater());
 		entity.setSendTime(new Date());
 		entity.setState(1);
 		log.info("新增或修改发货记录持久化数据：id={} {}", entity.getOid(), entity);
+
 		deliveryManageDao.save(entity);
+		return new DeliveryRes();
+	}
+
+	@Transactional
+	public BaseResp cancel(DeliveryForm req) {
+
+		DeliveryEntity entity = deliveryManageDao.updateByOid(req.getOid());
+		entity.setCancelOperater(req.getCancelOperater());
+		entity.setCancelReason(req.getCancelReason());
+		entity.setCancelTime(new Date());
+		entity.setState(2);
+		log.info("取消发货记录持久化数据：id={} {}", entity.getOid(), entity);
+
+		deliveryManageDao.save(entity);
+
+		// TODO 调用积分接口退积分
 		return new DeliveryRes();
 	}
 }

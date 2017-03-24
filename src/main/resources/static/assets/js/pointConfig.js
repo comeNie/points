@@ -23,7 +23,8 @@ define(function () {
             }, deliveryManage: {
                 list: this.host + '/points/deliveryManage/page',
                 findById: this.host + '/points/deliveryManage/findById',
-                save:this.host+'/points/deliveryManage/save'
+                save: this.host + '/points/deliveryManage/save',
+                cancel: this.host + '/points/deliveryManage/cancel'
             }
         }
     }
