@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
-import com.guohuai.basic.component.ext.web.Response;
-import com.guohuai.points.component.Constant;
 import com.guohuai.points.entity.PointSettingEntity;
 import com.guohuai.points.form.SettingForm;
 import com.guohuai.points.service.SettingService;
@@ -31,77 +29,82 @@ public class SettingController {
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Response> save(@Valid SettingForm req) {
-		Response r = new Response();
+	public ResponseEntity<BaseResp> save(@Valid SettingForm req) {
+		BaseResp response = new BaseResp();
 		//验证参数
 		if(StringUtil.isEmpty(req.getName())) {
-			r.with(Constant.RESULT, "积分名不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("积分名不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getPoints()) {
-			r.with(Constant.RESULT, "积分数不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("积分数不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getAmount()) {
-			r.with(Constant.RESULT, "所需金额不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("所需金额不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getTotalCount()) {
-			r.with(Constant.RESULT, "总数量不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("总数量不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		
-		settingService.savePoints(req);
-		r.with(Constant.RESULT, Constant.SUCCESS);
-
-		return new ResponseEntity<Response>(r, HttpStatus.OK);
+		response = settingService.savePoints(req);
+		return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Response> update(@Valid SettingForm req) {
-		Response r = new Response();
+	public ResponseEntity<BaseResp> update(@Valid SettingForm req) {
+		BaseResp response = new BaseResp();
 		//验证参数
 		if(StringUtil.isEmpty(req.getOid())){
-			r.with(Constant.RESULT, "无需要修改的商品");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("无需要修改的商品");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getName())) {
-			r.with(Constant.RESULT, "积分名不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("积分名不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getPoints()) {
-			r.with(Constant.RESULT, "积分数不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("积分数不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getAmount()) {
-			r.with(Constant.RESULT, "所需金额不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("所需金额不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getTotalCount()) {
-			r.with(Constant.RESULT, "总数量不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("总数量不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 
-		settingService.updatePoints(req);
-		r.with(Constant.RESULT, Constant.SUCCESS);
-
-		return new ResponseEntity<Response>(r, HttpStatus.OK);
+		response = settingService.updatePoints(req);
+		return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/edit", method = {RequestMethod.POST, RequestMethod.GET})
 	@ResponseBody
 	public ResponseEntity<BaseResp> edit(@Valid SettingForm req) {
-		BaseResp repponse = new BaseResp();
+		BaseResp response = new BaseResp();
 		//验证参数
 		if(StringUtil.isEmpty(req.getOid())){
-			repponse.setErrorCode(-1);
-			repponse.setErrorMessage("无需要修改的商品");
-			return new ResponseEntity<BaseResp>(repponse, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("无需要修改的商品");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		
-		repponse = settingService.editPoints(req);
-    	return new ResponseEntity<BaseResp>(repponse, HttpStatus.OK);
+		response = settingService.editPoints(req);
+    	return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 	}
 
 	/**
