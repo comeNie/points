@@ -107,7 +107,7 @@ public class AccountTransService {
 		AccountTransResponse resp  = new AccountTransResponse();
 		for(AccountTransRequest req : list){
 			resp = addAccTrans(req);
-			if(!"Constant.SUCCESS".equals(resp.getReturnCode())){
+			if(!Constant.SUCCESS.equals(resp.getReturnCode())){
 				return resp;
 			}
 		}
