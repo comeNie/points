@@ -8,7 +8,7 @@ import com.guohuai.points.account.entity.AccOrderEntity;
 
 public interface AccOrderDao extends JpaRepository<AccOrderEntity, String>, JpaSpecificationExecutor<AccOrderEntity> {
 	
-	@Query(value = "SELECT * FROM T_ACCOUNT_ORDER WHERE orderNo = ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM t_point_account_order WHERE orderNo = ?1", nativeQuery = true)
 	public AccOrderEntity findByOrderNo(String orderNo);
 	
 }

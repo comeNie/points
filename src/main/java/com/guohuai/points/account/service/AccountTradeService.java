@@ -66,27 +66,32 @@ public class AccountTradeService {
 		if (StringUtil.isEmpty(accountTradeRequest.getSystemSource())) {
 			accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2001.getCode());
 			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2001.getName());
+			log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 			return accountTradeResponse;
 		}
 		//订单类型
 		if (StringUtil.isEmpty(accountTradeRequest.getOrderType())) {
 			accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2002.getCode());
 			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2002.getName());
+			log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 			return accountTradeResponse;
 		}
 		//会员id
 		if (StringUtil.isEmpty(accountTradeRequest.getUserOid())) {
 			accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2003.getCode());
 			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2003.getName());
+			log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 			return accountTradeResponse;
 		}
 		//当订单为撤单，需传原订单
 		if (StringUtil.isEmpty(accountTradeRequest.getOldOrderNo()) && TradeType.KILLORDER.equals(accountTradeRequest.getOrderType())) {
 			accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2009.getCode());
 			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2009.getName());
+			log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 			return accountTradeResponse;
 		}
 		//第一步，接收订单，创建订单
+		log.info("");
 		CreateAccOrderRequest createAccOrderRequest = new CreateAccOrderRequest();
 		//组装创建基恩账户入参
 		createAccOrderRequest.setOrderNo(accountTradeRequest.getOrderNo());
@@ -106,23 +111,26 @@ public class AccountTradeService {
 			if(!Constant.SUCCESS.equals(createAccOrderResponse.getReturnCode())){//判断是否创建订单成功
 				accountTradeResponse.setReturnCode(createAccOrderResponse.getReturnCode());
 				accountTradeResponse.setErrorMessage(createAccOrderResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 		}catch(Exception e){
 			log.info("积分账户创建订单失败："+e);
 			accountTradeResponse.setReturnCode(Constant.FAIL);
 			accountTradeResponse.setErrorMessage("系统异常");
+			log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 			return accountTradeResponse;
 		}
 		//根据订单类型进行不同处理
-		if(TradeType.SIGNIN.equals(accountTradeRequest.getOrderType())
-				||TradeType.TICKET.equals(accountTradeRequest.getOrderType())
-				||TradeType.RECHARGE.equals(accountTradeRequest.getOrderType())){//签到||卡券||充值
+		if(TradeType.SIGNIN.getValue().equals(accountTradeRequest.getOrderType())
+				||TradeType.TICKET.getValue().equals(accountTradeRequest.getOrderType())
+				||TradeType.RECHARGE.getValue().equals(accountTradeRequest.getOrderType())){//签到||卡券||充值
 			//过期时间不能为空
 			if(accountTradeRequest.getOverdueTime() == null){
 				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2008.getCode());
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2008.getName());
 				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 			//第二步，创建积分基本户（不存在时创建，已存在不创建）
@@ -135,16 +143,17 @@ public class AccountTradeService {
 			//第三步，创建对应子账户
 			String accountType = "";//根据订单类型判断积分子账户类型
 			//组装子账户参数
-			if(TradeType.SIGNIN.equals(accountTradeRequest.getOrderType())){
+			if(TradeType.SIGNIN.getValue().equals(accountTradeRequest.getOrderType())){
 				accountType = AccountTypeEnum.ACCOUNT_TYPE02.getCode();
-			}else if(TradeType.TICKET.equals(accountTradeRequest.getOrderType())){
+			}else if(TradeType.TICKET.getValue().equals(accountTradeRequest.getOrderType())){
 				accountType = AccountTypeEnum.ACCOUNT_TYPE03.getCode();
-			}else if(TradeType.RECHARGE.equals(accountTradeRequest.getOrderType())){
+			}else if(TradeType.RECHARGE.getValue().equals(accountTradeRequest.getOrderType())){
 				accountType = AccountTypeEnum.ACCOUNT_TYPE04.getCode();
 			}else{//订单类型不支持
 				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2005.getCode());
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2005.getName());
 				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 			createAccountRequest.setAccountType(accountType);
@@ -166,24 +175,9 @@ public class AccountTradeService {
 				map1.put("balance", childbalance);
 				accountInfoList.add(map1);
 				
-				//组装交易流水入参
-				AccountTransRequest accountTransRequest = new AccountTransRequest();
-				accountTransRequest.setTransAccountNo(createAccountResponse.getAccountNo());
-				accountTransRequest.setAccountType(accountType);
-				accountTransRequest.setBalance(childbalance);
-				accountTransRequest.setDirection("add");
-				accountTransRequest.setOrderDesc(accountTradeRequest.getOrderDesc());
-				accountTransRequest.setOrderNo(accountTradeRequest.getOrderNo());
-				accountTransRequest.setOrderPoint(accountTradeRequest.getBalance());
-				accountTransRequest.setOrderType(accountTradeRequest.getOrderType());
-				accountTransRequest.setRelationProductName(accountTradeRequest.getRelationProductName());
-				accountTransRequest.setRelationProductNo(accountTradeRequest.getRelationProductNo());
-				accountTransRequest.setRemark(accountTradeRequest.getRemark());
-				accountTradeRequest.setRequestNo(accountTradeRequest.getRequestNo());
-				accountTradeRequest.setSystemSource(accountTradeRequest.getSystemSource());
-				accountTransRequest.setUserOid(accountTradeRequest.getUserOid());
+				AccountTransRequest accountTransRequest1 = installAccountTransRequest(accountTradeRequest, createAccountResponse.getAccountNo(), accountType, childbalance);
 				//子账户
-				accounttransList.add(accountTransRequest);
+				accounttransList.add(accountTransRequest1);
 				
 				//基本户操作
 				Map<String, Object> map2 = new HashMap<String, Object>();
@@ -193,19 +187,18 @@ public class AccountTradeService {
 				map2.put("balance", basicbalance);
 				accountInfoList.add(map2);
 				
-				accountTransRequest.setTransAccountNo(accountInfoEntity.getAccountNo());
-				accountTransRequest.setAccountType(AccountTypeEnum.ACCOUNT_TYPE01.getCode());
-				accountTransRequest.setBalance(basicbalance);
+				AccountTransRequest accountTransRequest2 = installAccountTransRequest(accountTradeRequest, accountInfoEntity.getAccountNo(), AccountTypeEnum.ACCOUNT_TYPE01.getCode(), basicbalance);
 				//基本户
-				accounttransList.add(accountTransRequest);
+				accounttransList.add(accountTransRequest2);
 				
 				//记录积分账户交易流水
 				if(accounttransList != null && accounttransList.size()>0){
 					AccountTransResponse accountTransResponse = accountTransService.addAccTransList(accounttransList);
-					if(!"Constant.SUCCESS".equals(accountTransResponse.getReturnCode())){
+					if(!Constant.SUCCESS.equals(accountTransResponse.getReturnCode())){
 						accountTradeResponse.setReturnCode(Constant.FAIL);
 						accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
 						callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+						log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 						return accountTradeResponse;
 					}
 				}
@@ -213,7 +206,7 @@ public class AccountTradeService {
 				if(accountInfoList != null && accountInfoList.size()>0){
 					BaseResp baseResp = accountInfoService.update(accountInfoList);
 					if(baseResp.getErrorCode()==0){
-						orderStatus = Constant.PAY2;//交易成功
+						orderStatus = Constant.PAY1;//交易成功
 					}else{
 						accountTradeResponse.setReturnCode(Constant.FAIL);
 						accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
@@ -225,9 +218,10 @@ public class AccountTradeService {
 				accountTradeResponse.setReturnCode(createAccOrderResponse.getReturnCode());
 				accountTradeResponse.setErrorMessage(createAccOrderResponse.getErrorMessage());
 				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
-		}else if(TradeType.CONSUME.equals(accountTradeRequest.getOrderType())){//消费积分
+		}else if(TradeType.CONSUME.getValue().equals(accountTradeRequest.getOrderType())){//消费积分
 			//第一步，查询基本户余额，判断是否够消费
 			AccountInfoEntity basicAccountEntity = accountInfoService.getAccountByTypeAndUser(AccountTypeEnum.ACCOUNT_TYPE01.getCode(), accountTradeRequest.getUserOid());
 			if(basicAccountEntity != null){
@@ -311,6 +305,7 @@ public class AccountTradeService {
 							accountTradeResponse.setReturnCode(Constant.FAIL);
 							accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
 							callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+							log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 							return accountTradeResponse;
 						}
 					}
@@ -318,11 +313,12 @@ public class AccountTradeService {
 					if(accountInfoList != null && accountInfoList.size()>0){
 						BaseResp baseResp = accountInfoService.update(accountInfoList);
 						if(baseResp.getErrorCode()==0){
-							orderStatus = Constant.PAY2;//交易成功
+							orderStatus = Constant.PAY1;//交易成功
 						}else{
 							accountTradeResponse.setReturnCode(Constant.FAIL);
 							accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
 							callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+							log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 							return accountTradeResponse;
 						}
 					}
@@ -331,6 +327,7 @@ public class AccountTradeService {
 					accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2007.getName());
 					//回写订单状态
 					callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+					log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 					return accountTradeResponse;
 				}
 			}else{//积分账户不存在，按积分为0提示，消费不创建积分账户
@@ -338,9 +335,10 @@ public class AccountTradeService {
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2006.getName());
 				//回写订单状态
 				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
-		}else if(TradeType.KILLORDER.equals(accountTradeRequest.getOrderType())){//撤单
+		}else if(TradeType.KILLORDER.getValue().equals(accountTradeRequest.getOrderType())){//撤单
 			//第一步，查询原订单是否存在
 			AccOrderEntity oldOrderEntity = accOrderService.getOrderByNo(accountTradeRequest.getOldOrderNo());
 			if(oldOrderEntity != null){
@@ -391,6 +389,7 @@ public class AccountTradeService {
 									accountTradeResponse.setReturnCode(Constant.FAIL);
 									accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
 									callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+									log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 									return accountTradeResponse;
 								}
 							}
@@ -398,11 +397,12 @@ public class AccountTradeService {
 							if(accountInfoList != null && accountInfoList.size()>0){
 								BaseResp baseResp = accountInfoService.update(accountInfoList);
 								if(baseResp.getErrorCode()==0){
-									orderStatus = Constant.PAY2;//交易成功
+									orderStatus = Constant.PAY1;//交易成功
 								}else{
 									accountTradeResponse.setReturnCode(Constant.FAIL);
 									accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
 									callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+									log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 									return accountTradeResponse;
 								}
 							}
@@ -412,6 +412,7 @@ public class AccountTradeService {
 						accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2012.getName());
 						//回写订单状态
 						callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+						log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 						return accountTradeResponse;
 					}
 				}else{//订单状态非成功，无需撤单
@@ -419,6 +420,7 @@ public class AccountTradeService {
 					accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2011.getName());
 					//回写订单状态
 					callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+					log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 					return accountTradeResponse;
 				}
 			}else{//原订单不存在
@@ -426,6 +428,7 @@ public class AccountTradeService {
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2010.getName());
 				//回写订单状态
 				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				log.info("积分交易异常："+accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 		}else{//积分过期
@@ -448,6 +451,35 @@ public class AccountTradeService {
 			String orderStatus, String errorMessage) {
 		accOrderService.updateOrderStatus(orderOid, orderStatus, errorMessage);
 	}
+	
+	/**
+	 * 组装交易流水参数
+	 * @param accountTradeRequest
+	 * @param createAccountResponse
+	 * @param accountType
+	 * @param balance
+	 * @return
+	 */
+	private AccountTransRequest installAccountTransRequest(AccountTradeRequest accountTradeRequest, String accountNo, String accountType, BigDecimal balance){
+		//组装交易流水入参
+		AccountTransRequest accountTransRequest = new AccountTransRequest();
+		accountTransRequest.setTransAccountNo(accountNo);
+		accountTransRequest.setAccountType(accountType);
+		accountTransRequest.setBalance(balance);
+		accountTransRequest.setDirection("add");
+		accountTransRequest.setOrderDesc(accountTradeRequest.getOrderDesc());
+		accountTransRequest.setOrderNo(accountTradeRequest.getOrderNo());
+		accountTransRequest.setOrderPoint(accountTradeRequest.getBalance());
+		accountTransRequest.setOrderType(accountTradeRequest.getOrderType());
+		accountTransRequest.setRelationProductName(accountTradeRequest.getRelationProductName());
+		accountTransRequest.setRelationProductNo(accountTradeRequest.getRelationProductNo());
+		accountTransRequest.setRemark(accountTradeRequest.getRemark());
+		accountTradeRequest.setRequestNo(accountTradeRequest.getRequestNo());
+		accountTradeRequest.setSystemSource(accountTradeRequest.getSystemSource());
+		accountTransRequest.setUserOid(accountTradeRequest.getUserOid());
+		
+		return accountTransRequest;
+	}
 
 	/**  
 	* BigDecimal的加法运算。  
@@ -455,7 +487,7 @@ public class AccountTradeService {
 	* @param b2 加数  
 	* @return 两个参数的和  
 	*/  
-	public BigDecimal add(BigDecimal b1,BigDecimal b2){   
+	public BigDecimal add(BigDecimal b1,BigDecimal b2){
 		return b1.add(b2);
 	}   
 	/**  

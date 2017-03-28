@@ -36,7 +36,7 @@ public interface AccountInfoDao extends JpaRepository<AccountInfoEntity, String>
 	public List<AccountInfoEntity> findByUserOidAndAccountType(String userOid,
 			String accountType);
 
-	@Query(value = "SELECT * FROM t_point_account WHERE userOid = ?1 and relationTicketCode = ?2  accountType = ?3", nativeQuery = true)
+	@Query(value = "SELECT * FROM t_point_account WHERE userOid = ?1 and relationTicketCode = ?2 and accountType = ?3", nativeQuery = true)
 	public List<AccountInfoEntity> findByUserOidAndAccountTypeAndProductNo(
 			String userOid, String relationProduct, String accountType);
 
