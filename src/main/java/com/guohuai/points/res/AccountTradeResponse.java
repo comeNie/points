@@ -31,7 +31,7 @@ public class AccountTradeResponse extends BaseResponse {
 	/**
 	 * 交易额
 	 */
-	private BigDecimal balance;	
+	private BigDecimal balance;
 	/**
 	 * 请求流水号
 	 */

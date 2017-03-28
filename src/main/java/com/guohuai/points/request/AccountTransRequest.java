@@ -24,8 +24,7 @@ public class AccountTransRequest implements Serializable{
 	 */
 	private String userOid; 
 	/**
-	 * 单据类型
-	 * 申购:01、赎回:02、派息:03、赠送体验金:04、体验金到期:05
+	 * 01：签到，02：卡券，03：充值，04：消费，05：过期， 06：撤单
 	 */
 	private String orderType; 
 	/**
@@ -73,8 +72,31 @@ public class AccountTransRequest implements Serializable{
 	 */
 	private String transAccountNo;
 	/**
-	 * 积分方向，增add 减reduce
+	 * 积分方向，增ADD 减REDUCE
 	 */
 	private String direction;
-	
+	/**
+	 * 最小交易积分
+	 */
+	private BigDecimal minOrderPoint;
+	/**
+	 * 最大交易积分
+	 */
+	private BigDecimal maxOrderPoint;
+	/**
+	 * 开始时间yyyy-MM-dd HH:mm:ss
+	 */
+	private String beginTime;
+	/**
+	 * 结束时间yyyy-MM-dd HH:mm:ss
+	 */
+	private String endTime;
+	/**
+	 * 查询页数
+	 */
+	private int page=1;
+	/**
+	 * 查询条数
+	 */
+	private int row=10;
 }

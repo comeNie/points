@@ -62,6 +62,10 @@ public class CreateAccOrderRequest implements Serializable{
 	/**
 	 * 定单描述
 	 */
-	private String orderDesc; 
+	private String orderDesc;
+	/**
+	 * 原单据号
+	 */
+	private String oldOrderNo;
 	
 }

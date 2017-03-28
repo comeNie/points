@@ -25,6 +25,10 @@ public enum TradeType {
      * 消费
      */
 	CONSUME("04"),
+	/**
+	 * 撤单
+	 */
+	KILLORDER("05"),
 	;
  
 	private String value;

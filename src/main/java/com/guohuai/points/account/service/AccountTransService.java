@@ -1,20 +1,34 @@
 package com.guohuai.points.account.service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.guohuai.basic.common.DateUtil;
+import com.guohuai.basic.common.StringUtil;
 import com.guohuai.points.account.dao.AccountTransDao;
 import com.guohuai.points.account.entity.AccountTransEntity;
 import com.guohuai.points.component.AccountTypeEnum;
 import com.guohuai.points.component.Constant;
 import com.guohuai.points.request.AccountTransRequest;
+import com.guohuai.points.res.AccountTransRes;
 import com.guohuai.points.res.AccountTransResponse;
 
 /**
@@ -98,5 +112,81 @@ public class AccountTransService {
 			}
 		}
 		return resp;
+	}
+	
+	/**
+	 * 获取用户交易记录流水
+	 * @param req
+	 * @return
+	 */
+	public AccountTransRes getUserAccountTrans(AccountTransRequest req){
+		log.info("积分账户交易记录查询",JSONObject.toJSONString(req));
+		Page<AccountTransEntity> listPage = transDao.findAll(buildSpecification(req),new PageRequest(req.getPage() - 1, req.getRow()));
+		AccountTransRes res =new AccountTransRes();
+		if (listPage != null && listPage.getSize() > 0) {
+			res.setRows(listPage.getContent());
+			res.setTotalPage(listPage.getTotalPages());
+			res.setPage(req.getPage());
+			res.setRow(req.getRow());
+			res.setTotal(listPage.getTotalElements());
+			return res;
+		}
+		return null;
+	}
+	
+	/**
+	 * 查询参数组装
+	 * @param req
+	 * @return
+	 */
+	public Specification<AccountTransEntity> buildSpecification(final AccountTransRequest req) {
+		Specification<AccountTransEntity> spec = new Specification<AccountTransEntity>() {
+			@Override
+			public Predicate toPredicate(Root<AccountTransEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+				List<Predicate> bigList =new ArrayList<Predicate>();
+				if (!StringUtil.isEmpty(req.getUserOid()))
+					bigList.add(cb.equal(root.get("userOid").as(String.class),req.getUserOid()));
+				if (!StringUtil.isEmpty(req.getOrderNo()))
+					bigList.add(cb.equal(root.get("orderNo").as(String.class),req.getOrderNo()));
+				if (!StringUtil.isEmpty(req.getOrderType()))
+					bigList.add(cb.equal(root.get("orderType").as(String.class),req.getOrderType()));
+				if (!StringUtil.isEmpty(req.getAccountType()))
+					bigList.add(cb.equal(root.get("accountType").as(String.class),req.getAccountType()));
+				if (!StringUtil.isEmpty(req.getDirection()))
+					bigList.add(cb.equal(root.get("direction").as(String.class),req.getDirection()));
+				if (req.getMinOrderPoint() != null && req.getMinOrderPoint().compareTo(BigDecimal.ZERO)>0)
+					bigList.add(cb.greaterThanOrEqualTo(root.get("amount").as(BigDecimal.class), req.getMinOrderPoint()));
+				if (req.getMaxOrderPoint() != null && req.getMaxOrderPoint().compareTo(BigDecimal.ZERO)>0)
+					bigList.add(cb.lessThanOrEqualTo(root.get("amount").as(BigDecimal.class), req.getMaxOrderPoint()));
+				if (!StringUtil.isEmpty(req.getBeginTime())) {
+					Date beginDate = DateUtil.parseDate(req.getBeginTime(), "yyyy-MM-dd HH:mm:ss");
+					bigList.add(cb.greaterThanOrEqualTo(root.get("createTime").as(Timestamp.class),
+							new Timestamp(beginDate.getTime())));
+				}
+				if (!StringUtil.isEmpty(req.getEndTime())) {
+					Date endDate = DateUtil.parseDate(req.getEndTime(), "yyyy-MM-dd HH:mm:ss");
+					bigList.add(cb.lessThanOrEqualTo(root.get("createTime").as(Timestamp.class),
+							new Timestamp(DateUtil.endTimeInMillis(endDate).getTime())));
+				}
+				query.where(cb.and(bigList.toArray(new Predicate[bigList.size()])));
+				query.orderBy(cb.desc(root.get("createTime")));
+				
+				// 条件查询
+				return query.getRestriction();
+			}
+		};
+		return spec;
+	}
+
+	/**
+	 * 根据用户订单号获取交易流水
+	 * @param userOid
+	 * @param oldOrderNo
+	 * @return
+	 */
+	public List<AccountTransEntity> getUserAccountTransByOrderNo(
+			String userOid, String oldOrderNo) {
+		List<AccountTransEntity> accountTranslist = transDao.findByUserAndOrderNo(userOid,oldOrderNo);
+		return accountTranslist;
 	}
 }
