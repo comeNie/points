@@ -116,9 +116,10 @@ public class AccOrderService {
      * 更新订单状态
      * @param oid
      * @param orderStatus
+     * @param errorMessage 
      * @return
      */
-    public BaseResp update(String oid, String orderStatus) {
+    public BaseResp updateOrderStatus(String oid, String orderStatus, String errorMessage) {
     	BaseResp response = new BaseResp();
     	log.info("{}积分订单状态变动,orderStatus:{}", oid, orderStatus);
     	//验证参数
@@ -131,6 +132,7 @@ public class AccOrderService {
  		
  		if(orderEntity!=null) {
  			orderEntity.setOrderStatus(orderStatus);
+ 			orderEntity.setErrorMessage(errorMessage);
  			orderEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
  			orderEntity = this.orderDao.saveAndFlush(orderEntity);
             

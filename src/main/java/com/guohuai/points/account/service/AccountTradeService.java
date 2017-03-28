@@ -10,11 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
+import com.guohuai.points.account.entity.AccOrderEntity;
 import com.guohuai.points.account.entity.AccountInfoEntity;
+import com.guohuai.points.account.entity.AccountTransEntity;
 import com.guohuai.points.component.AccountTypeEnum;
 import com.guohuai.points.component.Constant;
 import com.guohuai.points.component.TradeEventCodeEnum;
@@ -52,9 +55,12 @@ public class AccountTradeService {
 	 * @param accountTradeRequest
 	 * @return
 	 */
+	@Transactional
 	public AccountTradeResponse trade(AccountTradeRequest accountTradeRequest){
 		log.info("积分账户交易：AccountTradeRequest{}",JSONObject.toJSONString(accountTradeRequest));
 		AccountTradeResponse accountTradeResponse = new AccountTradeResponse();
+		accountTradeResponse.setRequestNo(accountTradeRequest.getRequestNo());
+		accountTradeResponse.setUserOid(accountTradeRequest.getUserOid());
 		String orderStatus = Constant.PAY2;//交易失败
 		//系统来源
 		if (StringUtil.isEmpty(accountTradeRequest.getSystemSource())) {
@@ -74,6 +80,12 @@ public class AccountTradeService {
 			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2003.getName());
 			return accountTradeResponse;
 		}
+		//当订单为撤单，需传原订单
+		if (StringUtil.isEmpty(accountTradeRequest.getOldOrderNo()) && TradeType.KILLORDER.equals(accountTradeRequest.getOrderType())) {
+			accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2009.getCode());
+			accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2009.getName());
+			return accountTradeResponse;
+		}
 		//第一步，接收订单，创建订单
 		CreateAccOrderRequest createAccOrderRequest = new CreateAccOrderRequest();
 		//组装创建基恩账户入参
@@ -87,6 +99,7 @@ public class AccountTradeService {
 		createAccOrderRequest.setBalance(accountTradeRequest.getBalance());
 		createAccOrderRequest.setRemark(accountTradeRequest.getRemark());
 		createAccOrderRequest.setOrderDesc(accountTradeRequest.getOrderDesc());
+		createAccOrderRequest.setOldOrderNo(accountTradeRequest.getOldOrderNo());//原订单号
 		CreateAccOrderResponse createAccOrderResponse = new CreateAccOrderResponse();
 		try{
 			createAccOrderResponse = accOrderService.addAccOrder(createAccOrderRequest);
@@ -109,6 +122,7 @@ public class AccountTradeService {
 			if(accountTradeRequest.getOverdueTime() == null){
 				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2008.getCode());
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2008.getName());
+				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 			//第二步，创建积分基本户（不存在时创建，已存在不创建）
@@ -130,6 +144,7 @@ public class AccountTradeService {
 			}else{//订单类型不支持
 				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2005.getCode());
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2005.getName());
+				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 			createAccountRequest.setAccountType(accountType);
@@ -145,9 +160,9 @@ public class AccountTradeService {
 				//子账户操作
 				Map<String, Object> map1 = new HashMap<String, Object>();
 				BigDecimal childbalance = add(createAccountResponse.getBalance(),accountTradeRequest.getBalance());//子账户积分余额+交易积分
-				log.info("{}用户积分子帐户积分增加：{}",accountTradeRequest.getUserOid(),childbalance);
+				log.info("{}用户积分子帐户{}积分增加：{}",accountTradeRequest.getUserOid(),createAccountResponse.getAccountNo(),childbalance);
 				//组装操作账户入参
-				map1.put("oid", accountTradeRequest.getUserOid());
+				map1.put("oid", createAccountResponse.getOid());
 				map1.put("balance", childbalance);
 				accountInfoList.add(map1);
 				
@@ -173,8 +188,8 @@ public class AccountTradeService {
 				//基本户操作
 				Map<String, Object> map2 = new HashMap<String, Object>();
 				BigDecimal basicbalance = add(accountInfoEntity.getBalance(),accountTradeRequest.getBalance());//基本户积分余额+交易积分
-				log.info("{}用户积分基本帐户积分增加：{}",accountTradeRequest.getUserOid(),basicbalance);
-				map2.put("oid", accountTradeRequest.getUserOid());
+				log.info("{}用户积分基本帐户{}积分增加：{}",accountTradeRequest.getUserOid(),accountInfoEntity.getAccountNo(),basicbalance);
+				map2.put("oid", accountInfoEntity.getOid());
 				map2.put("balance", basicbalance);
 				accountInfoList.add(map2);
 				
@@ -190,6 +205,7 @@ public class AccountTradeService {
 					if(!"Constant.SUCCESS".equals(accountTransResponse.getReturnCode())){
 						accountTradeResponse.setReturnCode(Constant.FAIL);
 						accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
+						callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 						return accountTradeResponse;
 					}
 				}
@@ -201,12 +217,14 @@ public class AccountTradeService {
 					}else{
 						accountTradeResponse.setReturnCode(Constant.FAIL);
 						accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
+						callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 						return accountTradeResponse;
 					}
 				}
 			}else{
 				accountTradeResponse.setReturnCode(createAccOrderResponse.getReturnCode());
 				accountTradeResponse.setErrorMessage(createAccOrderResponse.getErrorMessage());
+				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 		}else if(TradeType.CONSUME.equals(accountTradeRequest.getOrderType())){//消费积分
@@ -236,8 +254,8 @@ public class AccountTradeService {
 					//基本户操作
 					Map<String, Object> map2 = new HashMap<String, Object>();
 					basicbalance = sub(basicbalance, orderBalance);//积分基本户扣除相应的积分
-					log.info("{}用户积分基本帐户积分扣除：{}",accountTradeRequest.getUserOid(),basicbalance);
-					map2.put("oid", accountTradeRequest.getUserOid());
+					log.info("{}用户积分基本帐户{}积分扣除：{}",accountTradeRequest.getUserOid(), basicAccountEntity.getAccountNo(), basicbalance);
+					map2.put("oid", basicAccountEntity.getOid());
 					map2.put("balance", basicbalance);
 					accountInfoList.add(map2);
 					
@@ -250,37 +268,37 @@ public class AccountTradeService {
 					//第二步，对用户名下所有积分账户进行操作
 					//查询该用户名下所有积分子账户
 					List<AccountInfoEntity> childAccountInfoList = accountInfoService.getChildAccountListByUser(accountTradeRequest.getUserOid());
-					for(AccountInfoEntity AccountInfoEntity : childAccountInfoList){
+					for(AccountInfoEntity accountInfoEntity : childAccountInfoList){
 						BigDecimal childbalance = basicAccountEntity.getBalance();
 						//子账户操作
 						Map<String, Object> map1 = new HashMap<String, Object>();
 						if(isExcess(childbalance, orderBalance)){//判断子账户是否够
 							childbalance = sub(childbalance, orderBalance);//积分子帐户扣除相应的积分
-							accountTransRequest.setTransAccountNo(AccountInfoEntity.getAccountNo());
-							accountTransRequest.setAccountType(AccountInfoEntity.getAccountType());
+							accountTransRequest.setTransAccountNo(accountInfoEntity.getAccountNo());
+							accountTransRequest.setAccountType(accountInfoEntity.getAccountType());
 							accountTransRequest.setBalance(childbalance);
 							accountTransRequest.setOrderPoint(orderBalance);
 							//子账户
 							accounttransList.add(accountTransRequest);
 							
-							log.info("{}用户积分子帐户积分扣除：{}，余额：{}",accountTradeRequest.getUserOid(),orderBalance,childbalance);
+							log.info("{}用户积分子帐户{}积分扣除：{}，余额：{}",accountTradeRequest.getUserOid(),accountInfoEntity.getAccountNo(),orderBalance,childbalance);
 							//组装操作账户入参
-							map1.put("oid", accountTradeRequest.getUserOid());
+							map1.put("oid", accountInfoEntity.getOid());
 							map1.put("balance", childbalance);
 							accountInfoList.add(map1);
 							break;
 						}else{
-							accountTransRequest.setTransAccountNo(AccountInfoEntity.getAccountNo());
-							accountTransRequest.setAccountType(AccountInfoEntity.getAccountType());
+							accountTransRequest.setTransAccountNo(accountInfoEntity.getAccountNo());
+							accountTransRequest.setAccountType(accountInfoEntity.getAccountType());
 							accountTransRequest.setBalance(BigDecimal.ZERO);//余额为0
 							accountTransRequest.setOrderPoint(childbalance);//订单积分为原可用积分
 							//子账户
 							accounttransList.add(accountTransRequest);
 							orderBalance = sub(orderBalance, childbalance);//订单积分额减去已扣除积分额
-							log.info("{}用户积分子帐户积分扣除：{}，积分余额：{}，剩余需扣积分{}",
-									accountTradeRequest.getUserOid(),childbalance,BigDecimal.ZERO,orderBalance);
+							log.info("{}用户积分子帐户{}积分扣除：{}，积分余额：{}，剩余需扣积分{}",
+									accountTradeRequest.getUserOid(),accountInfoEntity.getAccountNo(),childbalance,BigDecimal.ZERO,orderBalance);
 							//组装操作账户入参
-							map1.put("oid", accountTradeRequest.getUserOid());
+							map1.put("oid", accountInfoEntity.getOid());
 							map1.put("balance", childbalance);
 							accountInfoList.add(map1);
 						}
@@ -292,6 +310,7 @@ public class AccountTradeService {
 						if(!"Constant.SUCCESS".equals(accountTransResponse.getReturnCode())){
 							accountTradeResponse.setReturnCode(Constant.FAIL);
 							accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
+							callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 							return accountTradeResponse;
 						}
 					}
@@ -303,17 +322,110 @@ public class AccountTradeService {
 						}else{
 							accountTradeResponse.setReturnCode(Constant.FAIL);
 							accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
+							callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 							return accountTradeResponse;
 						}
 					}
 				}else{//积分消费超额
 					accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2007.getCode());
 					accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2007.getName());
+					//回写订单状态
+					callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 					return accountTradeResponse;
 				}
 			}else{//积分账户不存在，按积分为0提示，消费不创建积分账户
 				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2006.getCode());
 				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2006.getName());
+				//回写订单状态
+				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+				return accountTradeResponse;
+			}
+		}else if(TradeType.KILLORDER.equals(accountTradeRequest.getOrderType())){//撤单
+			//第一步，查询原订单是否存在
+			AccOrderEntity oldOrderEntity = accOrderService.getOrderByNo(accountTradeRequest.getOldOrderNo());
+			if(oldOrderEntity != null){
+				if(Constant.PAY1.equals(oldOrderEntity.getOrderStatus())){
+					if(TradeType.CONSUME.equals(oldOrderEntity.getOrderType())){
+						//第二步，查询该订单所有交易流水
+						List<AccountTransEntity> oldAccountTransList = accountTransService.getUserAccountTransByOrderNo
+								(accountTradeRequest.getUserOid(), accountTradeRequest.getOldOrderNo());
+						if(oldAccountTransList != null && oldAccountTransList.size()>0){
+							//第三步，根据流水回退操作账户积分，并记录交易流水
+							List<Map<String, Object>> accountInfoList = new ArrayList<Map<String, Object>>();//执行操作账户List
+							List<AccountTransRequest> accounttransList = new ArrayList<AccountTransRequest>();//记录交易流水List
+							//组装交易流水入参
+							AccountTransRequest accountTransRequest = new AccountTransRequest();
+							accountTransRequest.setDirection("add");
+							accountTransRequest.setRelationProductName(oldOrderEntity.getRelationProductName());
+							accountTransRequest.setRelationProductNo(oldOrderEntity.getRelationProductCode());
+							accountTransRequest.setOrderDesc(accountTradeRequest.getOrderDesc());
+							accountTransRequest.setOrderNo(accountTradeRequest.getOrderNo());
+							accountTransRequest.setOrderType(accountTradeRequest.getOrderType());
+							accountTransRequest.setRemark(accountTradeRequest.getRemark());
+							accountTradeRequest.setRequestNo(accountTradeRequest.getRequestNo());
+							accountTradeRequest.setSystemSource(accountTradeRequest.getSystemSource());
+							accountTransRequest.setUserOid(accountTradeRequest.getUserOid());
+							
+							for(AccountTransEntity oldAccountTransEntity : oldAccountTransList){
+								Map<String, Object> map = new HashMap<String, Object>();
+								//查询该账户积分余额
+								AccountInfoEntity accountInfoEntity = accountInfoService.getAccountByNo(oldAccountTransEntity.getTransAccountNo());
+								BigDecimal balance = add(oldAccountTransEntity.getOrderPoint(), accountInfoEntity.getBalance());//积分子帐户增加相应的积分
+								accountTransRequest.setTransAccountNo(oldAccountTransEntity.getTransAccountNo());
+								accountTransRequest.setAccountType(oldAccountTransEntity.getAccountType());
+								accountTransRequest.setBalance(balance);
+								accountTransRequest.setOrderPoint(oldAccountTransEntity.getOrderPoint());
+								//相应账户
+								accounttransList.add(accountTransRequest);
+								
+								log.info("{}用户积分帐户{}积分增加：{}，余额：{}",accountTradeRequest.getUserOid(),oldAccountTransEntity.getTransAccountNo(),oldAccountTransEntity.getOrderPoint(),balance);
+								//组装操作账户入参
+								map.put("oid", accountInfoEntity.getOid());
+								map.put("balance", balance);
+								accountInfoList.add(map);
+							}
+							//记录积分账户交易流水
+							if(accounttransList != null && accounttransList.size()>0){
+								AccountTransResponse accountTransResponse = accountTransService.addAccTransList(accounttransList);
+								if(!"Constant.SUCCESS".equals(accountTransResponse.getReturnCode())){
+									accountTradeResponse.setReturnCode(Constant.FAIL);
+									accountTradeResponse.setErrorMessage(accountTransResponse.getErrorMessage());
+									callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+									return accountTradeResponse;
+								}
+							}
+							//对相应账户进行操作
+							if(accountInfoList != null && accountInfoList.size()>0){
+								BaseResp baseResp = accountInfoService.update(accountInfoList);
+								if(baseResp.getErrorCode()==0){
+									orderStatus = Constant.PAY2;//交易成功
+								}else{
+									accountTradeResponse.setReturnCode(Constant.FAIL);
+									accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
+									callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+									return accountTradeResponse;
+								}
+							}
+						}
+					}else{//非消费订单不允许撤单
+						accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2012.getCode());
+						accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2012.getName());
+						//回写订单状态
+						callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+						return accountTradeResponse;
+					}
+				}else{//订单状态非成功，无需撤单
+					accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2011.getCode());
+					accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2011.getName());
+					//回写订单状态
+					callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
+					return accountTradeResponse;
+				}
+			}else{//原订单不存在
+				accountTradeResponse.setReturnCode(TradeEventCodeEnum.TRADE_2010.getCode());
+				accountTradeResponse.setErrorMessage(TradeEventCodeEnum.TRADE_2010.getName());
+				//回写订单状态
+				callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 				return accountTradeResponse;
 			}
 		}else{//积分过期
@@ -321,16 +433,20 @@ public class AccountTradeService {
 		}
 		
 		//第四步，回写订单状态
-		BaseResp baseResp = accOrderService.update(createAccOrderResponse.getOrderOid(), orderStatus);
-		if(baseResp.getErrorCode()==0){
-			accountTradeResponse.setReturnCode(Constant.SUCCESS);
-		}else{
-			accountTradeResponse.setReturnCode(Constant.FAIL);
-			accountTradeResponse.setErrorMessage(baseResp.getErrorMessage());
-			return accountTradeResponse;
-		}
+		callBackOrderStatus(createAccOrderResponse.getOrderOid(), orderStatus, accountTradeResponse.getErrorMessage());
 		return accountTradeResponse;
-		
+	}
+	
+	/**
+	 * 回写订单状态
+	 * @param accountTradeResponse
+	 * @param orderOid
+	 * @param orderStatus
+	 * @return
+	 */
+	private void callBackOrderStatus(String orderOid,
+			String orderStatus, String errorMessage) {
+		accOrderService.updateOrderStatus(orderOid, orderStatus, errorMessage);
 	}
 
 	/**  
