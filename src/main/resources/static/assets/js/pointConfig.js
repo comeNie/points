@@ -20,11 +20,15 @@ define(function () {
             },
             exchangedBill: {
                 list: this.host + '/points/exchangedBill/page'
-            }, deliveryManage: {
+            },
+            deliveryManage: {
                 list: this.host + '/points/deliveryManage/page',
                 findById: this.host + '/points/deliveryManage/findById',
                 save: this.host + '/points/deliveryManage/save',
                 cancel: this.host + '/points/deliveryManage/cancel'
+            },
+            userPoints: {
+                list:this.host +'/points/userPoints/page'
             }
         }
     }
