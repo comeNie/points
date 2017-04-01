@@ -56,10 +56,9 @@ public class AccountInfoService {
 		//判断是否已存在积分基本户
 		accInfoList = accountInfoDao.findByUserOidAndAccountType(req.getUserOid(),req.getAccountType());
 		if(accInfoList != null&&accInfoList.size()>0){
+			logger.info("基本户oid："+accInfoList.get(0).getOid());
 			return accInfoList.get(0);
 		}
-		//生成oid
-		account.setOid(StringUtil.uuid());
 		Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		//生成账户号
 		String accountNo = this.seqGenerator.next(CodeConstants.ACCOUNT_NO_PREFIX);
@@ -73,6 +72,7 @@ public class AccountInfoService {
 		account.setCreateTime(nowTime);
 		account.setUpdateTime(nowTime);
 		accountInfoDao.save(account);//保存基本户
+		logger.info("基本户oid："+account.getOid());
 		return account;
 	}
 	
@@ -115,7 +115,7 @@ public class AccountInfoService {
 		Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		
 		AccountInfoEntity account = new AccountInfoEntity();
-		account.setOid(StringUtil.uuid());
+//		account.setOid(StringUtil.uuid());
 		account.setUserOid(req.getUserOid());
 		account.setAccountType(req.getAccountType());
 		account.setRelationTicketCode(req.getRelationProduct());
@@ -133,6 +133,8 @@ public class AccountInfoService {
 		Object result = accountInfoDao.save(account);
 		//返回参数
 		if(result != null){
+			resp.setOid(account.getOid());
+			logger.info("子账户oid："+account.getOid());
 			resp.setReturnCode(Constant.SUCCESS);
 			resp.setErrorMessage("成功");
 			resp.setUserOid(account.getUserOid());
@@ -192,6 +194,7 @@ public class AccountInfoService {
     @Transactional
     public BaseResp update(String oid, BigDecimal balance) {
     	BaseResp response = new BaseResp();
+    	logger.info("update");
     	logger.info("{}积分账户余额变动,balance:{}", oid, balance);
     	
     	//验证参数
@@ -200,7 +203,8 @@ public class AccountInfoService {
  			response.setErrorMessage("OID不能为空");
  			return response;
  		}
-        AccountInfoEntity accEntity = this.accountInfoDao.findOne(oid);
+//      AccountInfoEntity accEntity = this.accountInfoDao.findOne(oid);
+        AccountInfoEntity accEntity = this.accountInfoDao.findByOidForUpdate(oid);
         
         if(accEntity!=null) {
         	accEntity.setBalance(balance);
