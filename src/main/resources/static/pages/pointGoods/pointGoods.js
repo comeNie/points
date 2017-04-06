@@ -89,6 +89,8 @@ define([
 								return '未上架'
 							case 1:
 								return '已上架'
+							case 2:
+								return '已下架'
 							default:
 								return '-'
 						}
@@ -166,13 +168,16 @@ define([
 					}
 				});
 			}
-            function updateGoodsClick(e, val, row){
+            function updateGoodsClick(e, val, row){            	
 				//进入修改页面
 				console.log('oid===>'+row.oid);
           		var oid = row.oid;
 				confirm.find('.popover-title').html('提示');
 				confirm.find('p').html('确定修改？');
 				$("#tips_cancle").show();		
+				
+				initUploader2('#d_uploader', 'u');
+				
 				$$.confirm({
 					container: confirm,
 					trigger: this,
@@ -258,6 +263,7 @@ define([
 			
 			// 点击新增事件
 			$('#goods_add').on('click', function() {
+				initUploader2('#uploader', 'a');
 				$('#addGoodsModal').modal('show');
 			});
 			
@@ -336,25 +342,65 @@ define([
 
 			});
 			
-			// 上传弹窗按钮点击事件
-			$$.uploader({
-				container: $('#editOrderFileUploader'),
-				btnName: '更新附件',
-				size: 'sm',
-				success: function(file) {
-					file.furl = file.url
-					
-					if($("#editOrderFilesDiv").children().length > 0) {
-						var a = $('<a class="files_link" style="font-size:15px;" href=" ">&nbsp;&nbsp;&nbsp;&nbsp;'+file.name+'</ a>')
-					} else {
-						var a = $('<a class="files_link" style="font-size:15px;" href="javascript:void(0)">'+file.name+'</ a>')
-					}
-					
-					$("#editOrderFilesDiv").append(a)
-					$('#clearEditOrderFile').show()
-					editOrderFiles.push(file)
-				}
-			});
+            // 初始化上传附件插件，在success里将上传成功附件插入到表格中
+            function initUploader2(containerId, flag){
+            	var uploadProjectFiles = [];
+				var uploadFileUrls = [];
+				var uploader2Obj = null;
+				var divid = $(containerId+'  #uploader_filelist').text();
+				//清空plupload的历史files
+				$(containerId+'  '+containerId+'_filelist').empty();
+				
+            	$$.uploader2({
+	                container: $(containerId),
+	                success: function (file, up) {
+	                    uploadProjectFiles.push(file)
+	                    $('#uploadProjectTable').bootstrapTable('load', uploadProjectFiles)
+	                    if(uploader2Obj == null){
+	                    	uploader2Obj=up;
+	                    }
+	                    uploadFileUrls.push(file.url);
+	                    
+	                    addNewfiles(uploadFileUrls, flag);
+	                },
+	                remove: function (file, up) {
+	                   $.each(uploadProjectFiles,function(i){
+		                   	if(typeof this.fid !="undefined" && this.fid == file.fid){
+		                   		uploadProjectFiles.splice($.inArray(this, uploadProjectFiles),1); 
+		                   		$('#uploadProjectTable').bootstrapTable('load', uploadProjectFiles)
+		                   		return;
+		                   	}
+	                   });
+	                   //remove之后，获取最新的url数组
+	                   uploadFileUrls = [];
+	                   $.each(uploadProjectFiles,function(i){
+	                   		uploadFileUrls.push(file.url);
+	                   	});
+	                   addNewfiles(uploadFileUrls, flag);
+	                   if(uploader2Obj == null){
+	                    	uploader2Obj=up;
+	                   }
+	                }
+	            })
+            }
+            
+            /**
+             * 将最新图片url加入到form中，以便提交至后台
+             * @param {Object} fileUrls
+             * @param {Object} flag a:add/u:update
+             */
+            function addNewfiles(fileUrls, flag){
+            	var fils = "";
+                if(fileUrls.length > 0){
+                	fils = fileUrls.toString()
+                }
+                if(flag == 'a'){
+                	$('#add_files').val(fils);
+                }else{
+                	$('#update_files').val(fils);
+                }
+                
+            }
 			
         }
     }

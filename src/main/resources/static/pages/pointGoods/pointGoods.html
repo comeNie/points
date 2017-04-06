@@ -110,8 +110,10 @@
 						<span id="add_remark_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
-						<label>商品图片</label>
-						
+						<label>商品图片</label><input name="files" id="add_files" type="hidden">
+						<div class="row" style="height:200px">
+							<div class="col-sm-12 form-group" id="uploader"></div>
+						</div>
 					</div>
 					<input name="oid" type="hidden">
 				</form>
@@ -167,10 +169,10 @@
 						<span id="update_remark_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
-						<label>商品图片</label>
-						
+						<label>商品图片</label><input name="files" id="update_files" type="hidden">
+						<div class="col-sm-12 form-group" id="d_uploader"></div>
 					</div>
-					<input name="oid" type="hidden">
+					<input name="oid" type="hidden" />
 				</form>
 			</div>
 			<!-- 模态窗底部 -->
