@@ -173,10 +173,10 @@ public class GoodsService {
 					bigList.add(cb.equal(root.get("type").as(String.class), req.getType()));					
 				}
 				if (null != req.getState()){
-					bigList.add(cb.equal(root.get("state"), req.getState()));
+					bigList.add(cb.equal(root.get("state").as(Integer.class), req.getState()));
 				} else {
 					//默认查询非删除的商品
-					bigList.add(cb.gt(root.get("state"), -1));
+					bigList.add(cb.gt(root.get("state").as(Integer.class), -1));
 				}
 				
 				query.where(cb.and(bigList.toArray(new Predicate[bigList.size()])));

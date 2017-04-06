@@ -134,9 +134,9 @@ public class SettingService {
 					bigList.add(cb.equal(root.get("points"), req.getPoints()));					
 				}
 				if (null != req.getState()){
-					bigList.add(cb.equal(root.get("state"), req.getState()));
+					bigList.add(cb.equal(root.get("state").as(Integer.class), req.getState()));
 				} else {
-					bigList.add(cb.gt(root.get("state"), -1));
+					bigList.add(cb.gt(root.get("state").as(Integer.class), -1));
 				}
 				
 				query.where(cb.and(bigList.toArray(new Predicate[bigList.size()])));

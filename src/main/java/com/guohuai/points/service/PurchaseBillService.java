@@ -49,7 +49,7 @@ public class PurchaseBillService {
 		return resPage;
 	}
 
-	private Specification<PurchaseBillEntity> buildSpecification(PurchaseBillFrom req) {
+	private Specification<PurchaseBillEntity> buildSpecification(final PurchaseBillFrom req) {
 		return new Specification<PurchaseBillEntity>() {
 			@Override
 			public Predicate toPredicate(Root<PurchaseBillEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
