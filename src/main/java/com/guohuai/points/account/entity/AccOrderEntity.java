@@ -67,6 +67,10 @@ public class AccOrderEntity extends UUID implements Serializable {
 	 */
 	private String orderStatus;
 	/**
+	 * 订单异常信息
+	 */
+	private String errorMessage;
+	/**
 	 * 订单描述
 	 */
 	private String orderDesc;

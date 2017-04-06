@@ -1,32 +1,25 @@
-package com.guohuai.points.request;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
+package com.guohuai.points.form;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-/**
- * 交易流水请求参数
-* @ClassName: AccountTransRequest 
-* @Description: 
-* @author CHENDONGHUI
-* @date 2017年3月22日 上午11:34:41 
-*
- */
+import java.math.BigDecimal;
+
 @Data
-public class AccountTransRequest implements Serializable{
-	/**
-	* @Fields serialVersionUID : 
-	*/
-	private static final long serialVersionUID = 2136893610065389423L;
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class UserPointsForm extends BaseForm {
+	private String oid;
 	/**
 	 * 会员id
 	 */
-	private String userOid; 
+	private String userOid;
 	/**
 	 * 01：签到，02：卡券，03：充值，04：消费，05：过期， 06：撤单
 	 */
-	private String orderType; 
+	private String orderType;
 	/**
 	 * 账户类型
 	 */
@@ -34,11 +27,11 @@ public class AccountTransRequest implements Serializable{
 	/**
 	 * 关联产品、卡券编号
 	 */
-	private String relationProductNo; 
+	private String relationProductNo;
 	/**
 	 * 关联产品、卡券名称
 	 */
-	private String relationProductName; 
+	private String relationProductName;
 	/**
 	 * 交易积分额
 	 */
@@ -50,15 +43,15 @@ public class AccountTransRequest implements Serializable{
 	/**
 	 * 备注
 	 */
-	private String remark; 
+	private String remark;
 	/**
 	 * 来源系统单据号
 	 */
-	private String orderNo; 
+	private String orderNo;
 	/**
 	 * 来源系统类型
 	 */
-	private String systemSource; 
+	private String systemSource;
 	/**
 	 * 请求流水号
 	 */
@@ -83,20 +76,8 @@ public class AccountTransRequest implements Serializable{
 	 * 最大交易积分
 	 */
 	private BigDecimal maxOrderPoint;
-	/**
-	 * 开始时间yyyy-MM-dd HH:mm:ss
-	 */
+	// 用于搜索（开始时间）
 	private String beginTime;
-	/**
-	 * 结束时间yyyy-MM-dd HH:mm:ss
-	 */
+	// 用于搜索（结束时间）
 	private String endTime;
-	/**
-	 * 查询页数
-	 */
-	private int page=1;
-	/**
-	 * 查询条数
-	 */
-	private int row=10;
 }

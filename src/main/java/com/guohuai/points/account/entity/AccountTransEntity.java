@@ -48,7 +48,7 @@ public class AccountTransEntity extends UUID implements Serializable{
 	 */
 	private String userOid;
 	/**
-	 * 01：签到，02：卡券，03：充值，04：消费，05：过期
+	 * 01：签到，02：卡券，03：充值，04：消费，05：过期， 06：撤单
 	 */
 	private String orderType;
 	/**

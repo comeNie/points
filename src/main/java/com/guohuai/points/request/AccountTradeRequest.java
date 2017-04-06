@@ -64,5 +64,8 @@ public class AccountTradeRequest implements Serializable{
 	 * 备注
 	 */
 	private String remark;
-	
+	/**
+	 * 来源系统原单据号
+	 */
+	private String oldOrderNo;
 }
