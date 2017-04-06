@@ -166,7 +166,7 @@ public class AccountTransService {
 				if (!StringUtil.isEmpty(req.getEndTime())) {
 					Date endDate = DateUtil.parseDate(req.getEndTime(), "yyyy-MM-dd HH:mm:ss");
 					bigList.add(cb.lessThanOrEqualTo(root.get("createTime").as(Timestamp.class),
-							new Timestamp(DateUtil.endTimeInMillis(endDate).getTime())));
+							new Timestamp(endDate.getTime())));
 				}
 				query.where(cb.and(bigList.toArray(new Predicate[bigList.size()])));
 				query.orderBy(cb.desc(root.get("createTime")));

@@ -82,17 +82,17 @@
 					</div>
 					<div class="form-group">
 						<label>积分</label>
-						<input name="points" id="add_points" type="text" class="form-control input-sm" placeholder="请输入积分数" required>
+						<input name="points" id="add_points" type="text" class="form-control input-sm" placeholder="请输入积分数" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="add_points_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>金额</label>
-						<input name="amount" id="add_amount" type="text" class="form-control input-sm" placeholder="请输入所需金额" required>
+						<input name="amount" id="add_amount" type="text" class="form-control input-sm" placeholder="请输入所需金额" onkeyup="value=value.replace(/[^\d.]/g,'')" required>
 						<span id="add_amount_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>总张数</label>
-						<input name="totalCount" id="add_totalCount" type="text" class="form-control input-sm" placeholder="请输入总张数" required>
+						<input name="totalCount" id="add_totalCount" type="text" class="form-control input-sm" placeholder="请输入总张数" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="add_totalCount_err" style="color:red;"></span>
 					</div>
 					<input name="oid" type="hidden">
@@ -101,7 +101,7 @@
 			<!-- 模态窗底部 -->
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
-				<button id="doAddSetting" type="button" class="btn btn-primary btn-submit">提 交</button>
+				<button id="doAddSetting" type="button" class="btn btn-primary btn-submit addSettingSubmit">提 交</button>
 			</div>
 		</div>
 	</div>
