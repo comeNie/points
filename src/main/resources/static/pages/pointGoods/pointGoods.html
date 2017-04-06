@@ -96,22 +96,24 @@
 					</div>
 					<div class="form-group">
 						<label>所需积分</label>
-						<input name="needPoints" id="add_needPoints" type="text" class="form-control input-sm" placeholder="请输入所需积分" required>
+						<input name="needPoints" id="add_needPoints" type="text" class="form-control input-sm" placeholder="请输入所需积分" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="add_needPoints_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>商品数量</label>
-						<input name="totalCount" id="add_totalCount" type="text" class="form-control input-sm" placeholder="请输入商品数量" required>
+						<input name="totalCount" id="add_totalCount" type="text" class="form-control input-sm" placeholder="请输入商品数量" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="add_totalCount_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>商品介绍</label>
-						<input name="remark" id="add_remark" type="text" class="form-control input-sm" placeholder="请输入商品介绍" required>
+						<textarea name="remark" id="add_remark" class="form-control" rows="3" placeholder="请输入商品介绍" required></textarea>
 						<span id="add_remark_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
-						<label>商品图片</label>
-						
+						<label>商品图片</label><input name="files" id="add_files" type="hidden">
+						<div class="row" style="height:200px">
+							<div class="col-sm-12 form-group" id="uploader"></div>
+						</div>
 					</div>
 					<input name="oid" type="hidden">
 				</form>
@@ -119,7 +121,7 @@
 			<!-- 模态窗底部 -->
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
-				<button id="doAddGoods" type="button" class="btn btn-primary btn-submit">提 交</button>
+				<button id="doAddGoods" type="button" class="btn btn-primary btn-submit addGoodsSubmit">提 交</button>
 			</div>
 		</div>
 	</div>
@@ -153,30 +155,30 @@
 					</div>
 					<div class="form-group">
 						<label>所需积分</label>
-						<input name="needPoints" id="update_needPoints" type="text" class="form-control input-sm" placeholder="请输入所需积分" required>
+						<input name="needPoints" id="update_needPoints" type="text" class="form-control input-sm" placeholder="请输入所需积分" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="update_needPoints_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>商品数量</label>
-						<input name="totalCount" id="update_totalCount" type="text" class="form-control input-sm" placeholder="请输入商品数量" required>
+						<input name="totalCount" id="update_totalCount" type="text" class="form-control input-sm" placeholder="请输入商品数量" onkeyup="value=value.replace(/[^\d]/g,'')" required>
 						<span id="update_totalCount_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
 						<label>商品介绍</label>
-						<input name="remark" id="update_remark" type="text" class="form-control input-sm" placeholder="请输入商品介绍" required>
+						<textarea name="remark" id="update_remark" class="form-control" rows="3" placeholder="请输入商品介绍" required></textarea>
 						<span id="update_remark_err" style="color:red;"></span>
 					</div>
 					<div class="form-group">
-						<label>商品图片</label>
-						
+						<label>商品图片</label><input name="files" id="update_files" type="hidden">
+						<div class="col-sm-12 form-group" id="d_uploader"></div>
 					</div>
-					<input name="oid" type="hidden">
+					<input name="oid" type="hidden" />
 				</form>
 			</div>
 			<!-- 模态窗底部 -->
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
-				<button id="doUpdateGoods" type="button" class="btn btn-primary btn-submit">提 交</button>
+				<button id="doUpdateGoods" type="button" class="btn btn-primary btn-submit updateGoodsSubmit">提 交</button>
 			</div>
 		</div>
 	</div>

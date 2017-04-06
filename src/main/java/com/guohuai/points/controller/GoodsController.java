@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
-import com.guohuai.basic.component.ext.web.Response;
-import com.guohuai.points.component.Constant;
 import com.guohuai.points.entity.PointGoodsEntity;
 import com.guohuai.points.form.GoodsForm;
 import com.guohuai.points.service.GoodsService;
@@ -31,77 +29,81 @@ public class GoodsController {
 
 	@RequestMapping(value = "/save", method = {RequestMethod.POST, RequestMethod.GET})
 	@ResponseBody
-	public ResponseEntity<Response> save(@Valid GoodsForm req) {
-		Response r = new Response();
+	public ResponseEntity<BaseResp> save(@Valid GoodsForm req) {
+		BaseResp response = new BaseResp();
 		//验证参数
 		if(StringUtil.isEmpty(req.getName())) {
-			r.with(Constant.RESULT, "商品名不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品名不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getType())) {
-			r.with(Constant.RESULT, "商品类型不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品类型不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getNeedPoints()) {
-			r.with(Constant.RESULT, "所需积分不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("所需积分不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getTotalCount()) {
-			r.with(Constant.RESULT, "商品数量不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品数量不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getRemark())) {
-			r.with(Constant.RESULT, "商品介绍不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品介绍不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 //		if(StringUtil.isEmpty(req.getFileOid())) {
 //			r.with(Constant.RESULT, "商品图片不能为空");
 //			return new ResponseEntity<Response>(r, HttpStatus.OK);
 //		}
-		goodsService.saveGoods(req);
-		r.with(Constant.RESULT, Constant.SUCCESS);
-
-		return new ResponseEntity<Response>(r, HttpStatus.OK);
+		
+		response = goodsService.saveGoods(req);
+		return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/update", method = {RequestMethod.POST, RequestMethod.GET})
 	@ResponseBody
-	public ResponseEntity<Response> update(@Valid GoodsForm req) {
-		Response r = new Response();
+	public ResponseEntity<BaseResp> update(@Valid GoodsForm req) {
+		BaseResp response = new BaseResp();
 		//验证参数
 		if(StringUtil.isEmpty(req.getOid())){
-			r.with(Constant.RESULT, "无需要修改的商品");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("无需要修改的商品");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getName())) {
-			r.with(Constant.RESULT, "商品名不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品名不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getType())) {
-			r.with(Constant.RESULT, "商品类型不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品类型不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getNeedPoints()) {
-			r.with(Constant.RESULT, "所需积分不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("所需积分不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(null == req.getTotalCount()) {
-			r.with(Constant.RESULT, "商品数量不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品数量不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 		if(StringUtil.isEmpty(req.getRemark())) {
-			r.with(Constant.RESULT, "商品介绍不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
-		}
-		if(StringUtil.isEmpty(req.getFileOid())) {
-			r.with(Constant.RESULT, "商品图片不能为空");
-			return new ResponseEntity<Response>(r, HttpStatus.OK);
+			response.setErrorCode(-1);
+			response.setErrorMessage("商品介绍不能为空");
+			return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 		}
 
-		goodsService.updateGoods(req);
-		r.with(Constant.RESULT, Constant.SUCCESS);
-
-		return new ResponseEntity<Response>(r, HttpStatus.OK);
+		response = goodsService.updateGoods(req);
+		return new ResponseEntity<BaseResp>(response, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/edit", method = {RequestMethod.POST, RequestMethod.GET})

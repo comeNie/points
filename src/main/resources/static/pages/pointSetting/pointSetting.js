@@ -118,9 +118,8 @@ define([
             
             //按钮事件
             function deleteSettingClick(e, val, row){
-				//进入修改页面
 				console.log('oid===>'+row.oid);
-				var goodsOid = row.oid;
+				var oid = row.oid;
 				var confirm = $('#confirmModal');
 				confirm.find('.popover-title').html('提示');
 				confirm.find('p').html('确定要删除该积分产品吗？');
@@ -131,7 +130,7 @@ define([
 					accept: function(){
 						http.get(pointConfig.api.pointSetting.edit, {
 							data: {
-								oid: goodsOid,
+								oid: oid,
 								state: -1
 							}, 
 						}, function(res){
@@ -147,7 +146,7 @@ define([
 			}
             function putOnSettingClick(e, val, row) {
 				//上架
-				var goodsOid = row.oid;
+				var oid = row.oid;
 				console.log('oid===>'+row.oid);
 				var confirm = $('#confirmModal');
 				confirm.find('.popover-title').html('提示');
@@ -159,7 +158,7 @@ define([
 					accept: function(){
 						http.get(pointConfig.api.pointSetting.edit, {
 							data: {
-								oid: goodsOid,
+								oid: oid,
 								state: 1
 							},	
 						}, function(res){
@@ -176,7 +175,7 @@ define([
 			}
             function pullOffSettingClick(e, val, row) {
 				//下架
-				var goodsOid = row.oid;
+				var oid = row.oid;
 				var confirm = $('#confirmModal');
 				confirm.find('.popover-title').html('提示');
 				confirm.find('p').html('确定要下架吗？');
@@ -187,7 +186,7 @@ define([
 					accept: function(){
 						http.get(pointConfig.api.pointSetting.edit, {
 							data: {
-								oid: goodsOid,
+								oid: oid,
 								state: 2
 							},	
 						}, function(res){

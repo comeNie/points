@@ -10,58 +10,94 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
+import com.guohuai.points.dao.FileDao;
 import com.guohuai.points.dao.GoodsDao;
+import com.guohuai.points.entity.PointFileEntity;
 import com.guohuai.points.entity.PointGoodsEntity;
-import com.guohuai.points.entity.PointSettingEntity;
+
+import lombok.extern.slf4j.Slf4j;
 import com.guohuai.points.form.GoodsForm;
-import com.guohuai.points.res.GoodsRes;
 
 @Service
+@Slf4j
 public class GoodsService {
-	
-	private final static Logger logger = LoggerFactory.getLogger(GoodsService.class);
 	
 	@Autowired
 	private GoodsDao goodsDao;
+	
+	@Autowired
+	private FileDao fileDao;
+	
+	private final static String CATE = "POINT";
 	
 	/**
 	 * 新增积分商品
 	 * @param req
 	 */
+	@Transactional
 	public BaseResp saveGoods(GoodsForm req){
-		logger.info("新增积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		log.info("新增积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
 		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = new PointGoodsEntity();
 		BeanUtils.copyProperties(req, entity);
 		//默认已兑换数为0
 		entity.setExchangedCount(new BigDecimal(0));
 		entity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		entity.setOid(StringUtil.uuid());
 		entity.setState(0);
-		goodsDao.save(entity);
+		entity = goodsDao.save(entity);
+		
+		this.savFilesWithGoods(entity.getOid(), req.getFiles());
+		
 		response.setErrorCode(0);
 		return response;
+	}
+	
+	/**
+	 * 在保存图片时，先删除历史图片信息，再加入最新图片信息
+	 * @param goodsOid
+	 * @param Files
+	 */
+	private void savFilesWithGoods(String goodsOid, String Files){
+		if(!StringUtil.isEmpty(Files) && !StringUtil.isEmpty(goodsOid)){
+			log.info("待上传的积分商品图片： {} ", Files);
+			String[] urls = Files.split(",");
+			List<PointFileEntity> deleEntitys = fileDao.findByGoodsOid(goodsOid);
+			if(null != deleEntitys && deleEntitys.size() > 0){
+				fileDao.delete(deleEntitys);
+			}
+			List<PointFileEntity> list = new ArrayList<PointFileEntity>();
+			for (String url : urls) {
+				PointFileEntity file = new PointFileEntity();
+				file.setCate(CATE);
+				file.setGoodsOid(goodsOid);
+				file.setFkey(url);
+				file.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				list.add(file);
+			}
+			//批量保存图片url数据
+			fileDao.save(list);
+		}
 	}
 	
 	/**
 	 * 编辑积分商品
 	 * @param req
 	 */
+	@Transactional
 	public BaseResp updateGoods(GoodsForm req){
-		logger.info("编辑积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		log.info("编辑积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
 		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = goodsDao.findOne(req.getOid());
 		if(null != entity){
@@ -74,6 +110,9 @@ public class GoodsService {
 			entity.setFileOid(req.getFileOid());
 			entity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 			goodsDao.save(entity);
+			
+			this.savFilesWithGoods(entity.getOid(), req.getFiles());
+			
 			response.setErrorCode(0);
 		}else{
 			response.setErrorCode(-1);
@@ -85,8 +124,9 @@ public class GoodsService {
 	 * 上架、下架、删除积分商品
 	 * @param req
 	 */
+	@Transactional
 	public BaseResp editGoods(GoodsForm req){
-		logger.info("上架、下架积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
+		log.info("上架、下架积分商品参数, createGoodsRequest:{}", JSON.toJSONString(req));
 		BaseResp response = new BaseResp();
 		PointGoodsEntity entity = goodsDao.findOne(req.getOid());
 		if(null != entity){

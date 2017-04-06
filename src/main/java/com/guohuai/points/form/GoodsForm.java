@@ -40,6 +40,8 @@ public class GoodsForm extends BaseForm {
 	 */
 	private String fileOid;
 	
+	private String files;
+	
 	/**
 	 * 商品介绍
 	 */
