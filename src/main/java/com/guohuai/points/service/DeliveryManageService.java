@@ -52,7 +52,7 @@ public class DeliveryManageService {
 		return resPage;
 	}
 
-	private Specification<DeliveryEntity> buildSpecification(DeliveryForm req) {
+	private Specification<DeliveryEntity> buildSpecification(final DeliveryForm req) {
 		return new Specification<DeliveryEntity>() {
 			@Override
 			public Predicate toPredicate(Root<DeliveryEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {

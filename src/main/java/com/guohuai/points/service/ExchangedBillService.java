@@ -49,7 +49,7 @@ public class ExchangedBillService {
 		return resPage;
 	}
 
-	private Specification<ExchangedBillEntity> buildSpecification(ExchangedBillForm req) {
+	private Specification<ExchangedBillEntity> buildSpecification(final ExchangedBillForm req) {
 		return new Specification<ExchangedBillEntity>() {
 			@Override
 			public Predicate toPredicate(Root<ExchangedBillEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
