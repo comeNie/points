@@ -6,7 +6,7 @@
         <version>1.2.1.RELEASE</version>
     </parent>
     <artifactId>points</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>points</name>
     <description>points</description>
 
@@ -21,7 +21,7 @@
    		<connection>scm:git:https://git.coding.net/lonnyxue/points.git</connection>
    		<url>https://git.coding.net/lonnyxue/points.git</url>
    		<developerConnection>scm:git:https://git.coding.net/lonnyxue/points.git</developerConnection>
-   	  <tag>v0.0.1</tag>
+   	  <tag>HEAD</tag>
   </scm>
 
     <properties>
