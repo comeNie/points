@@ -1,12 +1,16 @@
 package com.guohuai.points.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.guohuai.basic.common.StringUtil;
 import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
+import com.guohuai.points.account.service.AccountTradeService;
+import com.guohuai.points.component.Constant;
 import com.guohuai.points.dao.DeliveryManageDao;
 import com.guohuai.points.entity.DeliveryEntity;
 import com.guohuai.points.form.DeliveryForm;
-import com.guohuai.points.form.ExchangedBillForm;
+import com.guohuai.points.request.AccountTradeRequest;
+import com.guohuai.points.res.AccountTradeResponse;
 import com.guohuai.points.res.DeliveryRes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +34,9 @@ import java.util.List;
 public class DeliveryManageService {
 	@Autowired
 	private DeliveryManageDao deliveryManageDao;
+
+	@Autowired
+	private AccountTradeService accountTradeService;
 
 	/**
 	 * 分页查询
@@ -89,7 +96,7 @@ public class DeliveryManageService {
 	@Transactional
 	public DeliveryRes save(DeliveryForm req) {
 
-		DeliveryEntity entity = deliveryManageDao.updateByOid(req.getOid());
+		DeliveryEntity entity = deliveryManageDao.forUpdateByOid(req.getOid());
 		entity.setLogisticsCompany(req.getLogisticsCompany());
 		entity.setLogisticsNumber(req.getLogisticsNumber());
 		entity.setSendOperater(req.getSendOperater());
@@ -104,7 +111,9 @@ public class DeliveryManageService {
 	@Transactional
 	public BaseResp cancel(DeliveryForm req) {
 
-		DeliveryEntity entity = deliveryManageDao.updateByOid(req.getOid());
+		BaseResp baseResp = new BaseResp();
+
+		DeliveryEntity entity = deliveryManageDao.forUpdateByOid(req.getOid());
 		entity.setCancelOperater(req.getCancelOperater());
 		entity.setCancelReason(req.getCancelReason());
 		entity.setCancelTime(new Date());
@@ -113,7 +122,24 @@ public class DeliveryManageService {
 
 		deliveryManageDao.save(entity);
 
-		// TODO 调用积分接口退积分
-		return new DeliveryRes();
+		//  调用积分接口退积分
+		AccountTradeRequest accountTradeRequest = new AccountTradeRequest();
+		accountTradeRequest.setOldOrderNo(entity.getOrderNumber());  // 原订单号
+		accountTradeRequest.setUserOid(entity.getUserOid()); //用户id
+		accountTradeRequest.setRequestNo(StringUtil.uuid());
+		accountTradeRequest.setSystemSource("points");
+		accountTradeRequest.setOrderType("06"); //撤单
+		log.info("调用积分接口req：{}", JSONObject.toJSON(accountTradeRequest));
+
+		AccountTradeResponse trade = accountTradeService.trade(accountTradeRequest);
+
+		log.info("调用积分接口resp：returnCode：{}  ErrorMessage：{}", trade.getReturnCode(), trade.getErrorMessage());
+
+		if (!Constant.SUCCESSED.equalsIgnoreCase(trade.getReturnCode())) {
+			log.info("原订单号：{} 调用积分接口退积分失败！", entity.getOrderNumber());
+			throw new RuntimeException("调用积分接口退积分失败！");
+		}
+		log.info("原订单号：{} 调用积分接口退积分成功！", entity.getOrderNumber());
+		return baseResp;
 	}
 }

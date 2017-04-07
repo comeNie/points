@@ -70,7 +70,13 @@ public class DeliveryManageController {
 		if (res.getErrorCode() == -1) {
 			return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
 		}
-		res = deliveryManageService.cancel(req);
+		try {
+			res = deliveryManageService.cancel(req);
+		} catch (Exception e) {
+			res.setErrorCode(-1);
+			res.setErrorMessage("调用积分接口退积分失败！");
+			return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
+		}
 		return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
 	}
 

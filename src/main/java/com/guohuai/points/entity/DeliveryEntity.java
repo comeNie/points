@@ -73,5 +73,9 @@ public class DeliveryEntity extends UUID implements Serializable {
 	 * 取消时间
 	 */
 	private Date cancelTime;
+	/**
+	 * 下单用户ID
+	 */
+	private String userOid;
 
 }
