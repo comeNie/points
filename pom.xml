@@ -17,9 +17,15 @@
             <url>http://api.guohuaigroup.com/nexus/content/repositories/releases</url>
         </repository>
     </distributionManagement>
+
+    <scm>
+   		<connection>scm:git:https://git.coding.net/lonnyxue/points.git</connection>
+   		<url>https://git.coding.net/lonnyxue/points.git</url>
+   		<developerConnection>scm:git:https://git.coding.net/lonnyxue/points.git</developerConnection>
+   	</scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>com.guohuai.points.PointsBoot</start-class>
     </properties>
     <dependencies>
         <dependency>
