@@ -74,7 +74,7 @@ public class DeliveryManageController {
 			res = deliveryManageService.cancel(req);
 		} catch (Exception e) {
 			res.setErrorCode(-1);
-			res.setErrorMessage("调用积分接口退积分失败！");
+			res.setErrorMessage(e.getMessage());
 			return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
 		}
 		return new ResponseEntity<BaseResp>(res, HttpStatus.OK);
