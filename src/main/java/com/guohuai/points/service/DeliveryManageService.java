@@ -6,6 +6,7 @@ import com.guohuai.basic.component.ext.web.BaseResp;
 import com.guohuai.basic.component.ext.web.PageResp;
 import com.guohuai.points.account.service.AccountTradeService;
 import com.guohuai.points.component.Constant;
+import com.guohuai.points.component.TradeType;
 import com.guohuai.points.dao.DeliveryManageDao;
 import com.guohuai.points.entity.DeliveryEntity;
 import com.guohuai.points.form.DeliveryForm;
@@ -128,7 +129,7 @@ public class DeliveryManageService {
 		accountTradeRequest.setUserOid(entity.getUserOid()); //用户id
 		accountTradeRequest.setRequestNo(StringUtil.uuid());
 		accountTradeRequest.setSystemSource("points");
-		accountTradeRequest.setOrderType("06"); //撤单
+		accountTradeRequest.setOrderType(TradeType.KILLORDER.getValue()); //撤单
 		log.info("调用积分接口req：{}", JSONObject.toJSON(accountTradeRequest));
 
 		AccountTradeResponse trade = accountTradeService.trade(accountTradeRequest);
@@ -137,7 +138,7 @@ public class DeliveryManageService {
 
 		if (!Constant.SUCCESSED.equalsIgnoreCase(trade.getReturnCode())) {
 			log.info("原订单号：{} 调用积分接口退积分失败！", entity.getOrderNumber());
-			throw new RuntimeException("调用积分接口退积分失败！");
+			throw new RuntimeException("调用积分接口退积分失败：" + trade.getErrorMessage());
 		}
 		log.info("原订单号：{} 调用积分接口退积分成功！", entity.getOrderNumber());
 		return baseResp;
